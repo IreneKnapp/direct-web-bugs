@@ -1,0 +1,6 @@
+{"database": "qmic.db",
+ "port": 28428,
+ "access-log": "access.log",
+ "error-log": "error.log",
+ "user": "irene",
+ "group": "staff"}
