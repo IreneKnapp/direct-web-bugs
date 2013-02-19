@@ -2,7 +2,6 @@
 /qmic/api/logout POST
 /qmic/api/confirm?code=<code> GET
 /qmic/api/account/email/ GET
-/qmic/api/account/email/<email> GET
 /qmic/api/account/email/<email>/add POST
 /qmic/api/account/email/<email>/delete POST
 /qmic/api/account/email/<email>/primary POST

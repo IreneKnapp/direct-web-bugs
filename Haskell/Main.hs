@@ -38,6 +38,12 @@ instance JSON.FromJSON Configuration where
   parseJSON _ = mzero
 
 
+data Handler =
+  Handler {
+      handlerAction :: (MonadHTTP m) => m Bool
+    }
+
+
 getServerParameters :: Configuration -> IO HTTP.HTTPServerParameters
 getServerParameters configuration = do
   let port =
@@ -85,3 +91,59 @@ main = do
     _ -> do
       putStrLn $ "Usage: qmic configuration.json"
       IO.exitFailure
+
+
+allHandlers :: [Handler]
+allHandlers =
+  [loginAPIHandler,
+   logoutAPIHandler,
+   confirmAPIHandler,
+   accountEmailListAPIHandler,
+   accountEmailDetailsAPIHandler,
+   accountEmailAddAPIHandler,
+   accountEmailDeleteAPIHandler,
+   accountEmailSetPrimaryAPIHandler,
+   playerListAPIHandler,
+   playerDetailsAPIHandler,
+   ruleListAPIHandler,
+   ruleDetailsAPIHandler,
+   proposalListAPIHandler,
+   proposalAddAPIHandler,
+   proposalDeleteAPIHandler,
+   proposalSubmitAPIHandler,
+   proposalVoteAPIHandler,
+   loginFrontEndHandler,
+   logoutFrontEndHandler,
+   accountFrontEndHandler,
+   writeFrontEndHandler,
+   voteFrontEndHandler,
+   rulesFrontEndHandler,
+
+
+/qmic/api/login?next=<href> POST
+/qmic/api/logout POST
+/qmic/api/confirm?code=<code> GET
+/qmic/api/account/email/ GET
+/qmic/api/account/email/<email> GET
+/qmic/api/account/email/<email>/delete POST
+/qmic/api/account/email/<email>/primary POST
+/qmic/api/player/ GET
+/qmic/api/player/<id> GET
+/qmic/api/rule/ GET
+/qmic/api/rule/<id> GET
+/qmic/api/proposal/ GET
+/qmic/api/proposal/active/ GET
+/qmic/api/proposal/passed/ GET
+/qmic/api/proposal/failed/ GET
+/qmic/api/proposal/add POST
+/qmic/api/proposal/delete POST
+/qmic/api/proposal/submit POST
+/qmic/api/proposal/vote POST
+/qmic/login?next=<href> GET
+/qmic/logout GET POST
+/qmic/account GET
+/qmic/write GET
+/qmic/vote GET
+/qmic/rules GET
+/qmic/proposals GET
+/qmic/players GET
