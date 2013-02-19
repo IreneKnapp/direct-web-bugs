@@ -32,9 +32,10 @@ CREATE TABLE email_confirmation_codes (
 CREATE TABLE rules (
     rule_id BLOB,
     version_id BLOB,
-    creating_proposal_id BLOB,
     number TEXT UNIQUE,
     name TEXT,
+    status TEXT
+    CHECK (status IN ('active', 'repealed', 'replaced')),
     PRIMARY KEY (rule_id, version_id)
 );
 
@@ -361,5 +362,27 @@ CREATE TABLE event_actions (
     ON DELETE RESTRICT
     ON UPDATE CASCADE,
     PRIMARY KEY (event_id, action_index)
+);
+
+
+CREATE TABLE event_rule_effects (
+    event_id BLOB
+    REFERENCES events (event_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+    rule_id BLOB NOT NULL
+    REFERENCES rules (rule_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+    old_version_id BLOB,
+    new_version_id BLOB,
+    FOREIGN KEY (rule_id, old_version_id)
+    REFERENCES rules (rule_id, version_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+    FOREIGN KEY (rule_id, new_version_id)
+    REFERENCES rules (rule_id, version_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
 );
 
