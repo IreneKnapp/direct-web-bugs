@@ -4,7 +4,7 @@ CREATE TABLE players (
     REFERENCES emails (email)
     ON DELETE RESTRICT
     ON UPDATE CASCADE,
-    given_name TEXT,
+    personal_name TEXT,
     join_timestamp INTEGER
 );
 
