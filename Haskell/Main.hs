@@ -53,13 +53,13 @@ getServerParameters configuration = do
         HTTP.serverParametersErrorLogPath =
           configurationErrorLogPath configuration,
         HTTP.serverParametersDaemonize =
-          False,
+          True,
         HTTP.serverParametersUserToChangeTo =
           configurationUser configuration,
         HTTP.serverParametersGroupToChangeTo =
           configurationGroup configuration,
         HTTP.serverParametersForkPrimitive =
-          Concurrent.forkOS,
+          Concurrent.forkIO,
         HTTP.serverParametersListenSockets =
           [HTTP.HTTPListenSocketParameters {
                 HTTP.listenSocketParametersAddress = address,

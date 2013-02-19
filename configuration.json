@@ -1,6 +1,6 @@
-{"database": "qmic.db",
+{"database": "/home/irene/Projects/Active/qmic/qmic.db",
  "port": 28428,
- "access-log": "access.log",
- "error-log": "error.log",
+ "access-log": "/home/irene/Projects/Active/qmic/access.log",
+ "error-log": "/home/irene/Projects/Active/qmic/error.log",
  "user": "irene",
- "group": "staff"}
+ "group": "irene"}
