@@ -38,12 +38,6 @@ instance JSON.FromJSON Configuration where
   parseJSON _ = mzero
 
 
-data Handler =
-  Handler {
-      handlerAction :: (MonadHTTP m) => m Bool
-    }
-
-
 getServerParameters :: Configuration -> IO HTTP.HTTPServerParameters
 getServerParameters configuration = do
   let port =
@@ -93,7 +87,7 @@ main = do
       IO.exitFailure
 
 
-allHandlers :: [Handler]
+allHandlers :: (HTTP.MonadHTTP m) => [m Bool]
 allHandlers =
   [loginAPIHandler,
    logoutAPIHandler,
@@ -108,18 +102,100 @@ allHandlers =
    ruleListAPIHandler,
    ruleDetailsAPIHandler,
    proposalListAPIHandler,
+   proposalVoteAPIHandler,
    proposalAddAPIHandler,
+   proposalDetailsAPIHandler,
+   proposalUpdateAPIHandler,
    proposalDeleteAPIHandler,
    proposalSubmitAPIHandler,
-   proposalVoteAPIHandler,
    loginFrontEndHandler,
    logoutFrontEndHandler,
    accountFrontEndHandler,
    writeFrontEndHandler,
    voteFrontEndHandler,
    rulesFrontEndHandler,
+   proposalsFrontEndHandler,
+   playersFrontEndHandler]
 
 
+
+data RequestPattern =
+  RequestPattern {
+      requestPatternMethod :: String,
+      requestPatternPath :: [PathComponentPattern],
+      requestPatternIsDirectory :: Bool,
+      requestPatternQueryVariables :: Map.Map String (String -> Maybe Dynamic),
+      requestPatternFormVariables :: Map.Map String (String -> Maybe Dynamic)
+    }
+
+
+data PathComponentPattern
+  = ConstantPathComponentPattern String
+  | VariablePathComponentPattern String (String -> Maybe Dynamic)
+
+
+whenRequestPattern
+  :: (HTTP.MonadHTTP m)
+  => RequestPattern
+  -> (Map String Dynamic -> m Bool)
+  -> m Bool
+whenRequestPattern pattern handler = do
+  method <- HTTP.getRequestMethod
+  if method /= requestPatternMethod pattern
+    then return False
+    else do
+      uri <- HTTP.getRequestURI
+
+
+loginAPIHandler :: (HTTP.MonadHTTP m) => m Bool
+loginAPIHandler =
+  whenRequestPattern
+    (RequestPattern {
+         requestPatternMethod = "GET,
+         requestPatternPath =
+           uriPrefix
+           ++ [ConstantPathComponentPattern "api",
+               ConstantPathComponentPattern "login"]
+         requestPatternIsDirectory = False,
+         requestPatternQueryVariables =
+           Map.fromList [("next", absoluteLocalURIDecoder)],
+         requestPatternFormVariables =
+           Map.fromList [("username", nonemptyTextDecoder),
+                         ("password", nonemptyTextDecoder)]
+       })
+    $ \variables -> do
+       httpLog "Login attempt"
+
+
+logoutAPIHandler :: (MonadHTTP m) => m Bool
+confirmAPIHandler :: (MonadHTTP m) => m Bool
+accountEmailListAPIHandler :: (MonadHTTP m) => m Bool
+accountEmailDetailsAPIHandler :: (MonadHTTP m) => m Bool
+accountEmailAddAPIHandler :: (MonadHTTP m) => m Bool
+accountEmailDeleteAPIHandler :: (MonadHTTP m) => m Bool
+accountEmailSetPrimaryAPIHandler :: (MonadHTTP m) => m Bool
+playerListAPIHandler :: (MonadHTTP m) => m Bool
+playerDetailsAPIHandler :: (MonadHTTP m) => m Bool
+ruleListAPIHandler :: (MonadHTTP m) => m Bool
+ruleDetailsAPIHandler :: (MonadHTTP m) => m Bool
+proposalListAPIHandler :: (MonadHTTP m) => m Bool
+proposalVoteAPIHandler :: (MonadHTTP m) => m Bool
+proposalAddAPIHandler :: (MonadHTTP m) => m Bool
+proposalDetailsAPIHandler :: (MonadHTTP m) => m Bool
+proposalUpdateAPIHandler :: (MonadHTTP m) => m Bool
+proposalDeleteAPIHandler :: (MonadHTTP m) => m Bool
+proposalSubmitAPIHandler :: (MonadHTTP m) => m Bool
+loginFrontEndHandler :: (MonadHTTP m) => m Bool
+logoutFrontEndHandler :: (MonadHTTP m) => m Bool
+accountFrontEndHandler :: (MonadHTTP m) => m Bool
+writeFrontEndHandler :: (MonadHTTP m) => m Bool
+voteFrontEndHandler :: (MonadHTTP m) => m Bool
+rulesFrontEndHandler :: (MonadHTTP m) => m Bool
+proposalsFrontEndHandler :: (MonadHTTP m) => m Bool
+playersFrontEndHandler :: (MonadHTTP m) => m Bool
+
+
+{-
 /qmic/api/login?next=<href> POST
 /qmic/api/logout POST
 /qmic/api/confirm?code=<code> GET
@@ -135,10 +211,11 @@ allHandlers =
 /qmic/api/proposal/active/ GET
 /qmic/api/proposal/passed/ GET
 /qmic/api/proposal/failed/ GET
-/qmic/api/proposal/add POST
-/qmic/api/proposal/delete POST
-/qmic/api/proposal/submit POST
 /qmic/api/proposal/vote POST
+/qmic/api/proposal/add POST
+/qmic/api/proposal/<id> GET POST
+/qmic/api/proposal/<id>/delete POST
+/qmic/api/proposal/<id>/submit POST
 /qmic/login?next=<href> GET
 /qmic/logout GET POST
 /qmic/account GET
@@ -147,3 +224,4 @@ allHandlers =
 /qmic/rules GET
 /qmic/proposals GET
 /qmic/players GET
+-}
