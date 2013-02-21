@@ -7,6 +7,7 @@ import qualified Data.Aeson as JSON
 import qualified Data.Bits as Bits
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
+import qualified Data.Char as Char
 import qualified Data.Map as Map
 import qualified Database.SQLite.Simple as SQL
 import qualified Database.SQLite.Simple.FromRow as SQL
@@ -18,6 +19,8 @@ import qualified System.Exit as IO
 import Control.Applicative
 import Control.Monad
 import Data.Dynamic
+import Data.List
+import Data.Maybe
 
 
 data Configuration =
@@ -48,12 +51,14 @@ data Request =
       requestQueryVariables :: Map.Map String String,
       requestContent :: RequestContent
     }
+  deriving (Show)
 
 
 data RequestContent
   = NoRequestContent
   | JSONRequestContent BS.ByteString
   | UnknownRequestContent
+  deriving (Show)
 
 
 data RequestPattern =
@@ -119,8 +124,8 @@ main = do
         Right configuration -> do
           serverParameters <- getServerParameters configuration
           HTTP.acceptLoop serverParameters $ do
-            HTTP.httpLog "Hmm..."
-            HTTP.httpPutStr "Hmm...\n"
+            request <- getRequest
+            HTTP.httpPutStr $ "'" ++ show request ++ "'"
     _ -> do
       putStrLn $ "Usage: qmic configuration.json"
       IO.exitFailure
@@ -231,8 +236,7 @@ expectJSONContent name parser oldPattern =
     }
 
 
-{-
-getRequest :: (MonadHTTP m) => m Request
+getRequest :: (HTTP.MonadHTTP m) => m Request
 getRequest = do
   method <- HTTP.getRequestMethod
   uri <- HTTP.getRequestURI
@@ -242,17 +246,61 @@ getRequest = do
         if isSuffixOf "/" pathString'
           then (take (length pathString' - 1) pathString', True)
           else (pathString', False)
-      query' = stripPrefix "?" query
-      pathStringLoop = 
+      path = wordsLoop [] pathString''
+      wordsLoop soFar string =
+        case break (\c -> c == '/') string of
+          (_, "") -> soFar ++ [string]
+          (next, rest) -> wordsLoop (soFar ++ [next]) (tail rest)
+      query' = fromMaybe query $ stripPrefix "?" query
+      queryVariables = decodeFormVariables query'
   return Request {
              requestMethod = method,
-             requestPath :: [String],
-             requestHasTrailingSlash :: Bool,
-             requestQueryVariables :: Map.empty,
-             requestContent :: NoRequestContent
+             requestPath = path,
+             requestHasTrailingSlash = hasTrailingSlash,
+             requestQueryVariables = queryVariables,
+             requestContent = NoRequestContent
            }
 
 
+decodeFormVariables :: String -> Map.Map String String
+decodeFormVariables input =
+  let result =
+        Map.fromList
+         $ concatMap (\word ->
+                        let (key, value) = break (\c -> c == '=') word
+                        in case (unescape "" key,
+                                 unescape "" $ drop 1 value) of
+                             (Just key, Just value) -> [(key, value)]
+                             _ -> [])
+                     $ filter (\word -> length word > 0)
+                              $ wordsLoop [] input
+      wordsLoop soFar string =
+        case break (\c -> c == '&') string of
+          (_, "") -> soFar ++ [string]
+          (next, rest) -> wordsLoop (soFar ++ [next]) (tail rest)
+      unescape soFar [] = Just soFar
+      unescape soFar ('%' : high : low : rest) = 
+        let hexValue c =
+              if Char.isDigit c
+                then Just $ Char.ord c - Char.ord '0'
+                else if Char.isAlpha c
+                       then let value = Char.ord (Char.toLower c)
+                                        - Char.ord 'a' + 10
+                            in if value < 16
+                                 then Just value
+                                 else Nothing
+                       else Nothing
+        in case (hexValue high, hexValue low) of
+             (Just high, Just low) | high < 8 ->
+               unescape (soFar ++ [Char.chr (high * 16 + low)]) rest
+             _ -> Nothing
+      unescape soFar ('%' : _) = Nothing
+      unescape soFar ('+' : rest) = unescape (soFar ++ " ") rest
+      unescape soFar (c : rest) = unescape (soFar ++ [c]) rest
+  in result
+
+
+{-
 whenRequestPattern
   :: (HTTP.MonadHTTP m)
   => RequestPattern
