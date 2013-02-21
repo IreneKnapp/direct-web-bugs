@@ -7,6 +7,7 @@ import qualified Data.Aeson as JSON
 import qualified Data.Bits as Bits
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
+import qualified Data.Map as Map
 import qualified Database.SQLite.Simple as SQL
 import qualified Database.SQLite.Simple.FromRow as SQL
 import qualified Network.HTTP as HTTP
@@ -16,6 +17,7 @@ import qualified System.Exit as IO
 
 import Control.Applicative
 import Control.Monad
+import Data.Dynamic
 
 
 data Configuration =
@@ -36,6 +38,42 @@ instance JSON.FromJSON Configuration where
                   <*> value JSON..:? "user"
                   <*> value JSON..:? "group"
   parseJSON _ = mzero
+
+
+data Request =
+  Request {
+      requestMethod :: String,
+      requestPath :: [String],
+      requestHasTrailingSlash :: Bool,
+      requestQueryVariables :: Map.Map String String,
+      requestContent :: RequestContent
+    }
+
+
+data RequestContent
+  = NoRequestContent
+  | JSONRequestContent BS.ByteString
+  | UnknownRequestContent
+
+
+data RequestPattern =
+  RequestPattern {
+      requestPatternMethod :: String,
+      requestPatternPath :: [PathComponentPattern],
+      requestPatternTrailingSlash :: Bool,
+      requestPatternQueryVariables :: Map.Map String (String -> Maybe Dynamic),
+      requestPatternContent :: RequestContentPattern
+    }
+
+
+data PathComponentPattern
+  = ConstantPathComponentPattern String
+  | VariablePathComponentPattern String (String -> Maybe Dynamic)
+
+
+data RequestContentPattern
+  = NoRequestContentPattern
+  | JSONRequestContentPattern String (BS.ByteString -> Maybe Dynamic)
 
 
 getServerParameters :: Configuration -> IO HTTP.HTTPServerParameters
@@ -82,11 +120,13 @@ main = do
           serverParameters <- getServerParameters configuration
           HTTP.acceptLoop serverParameters $ do
             HTTP.httpLog "Hmm..."
+            HTTP.httpPutStr "Hmm...\n"
     _ -> do
       putStrLn $ "Usage: qmic configuration.json"
       IO.exitFailure
 
 
+{-
 allHandlers :: (HTTP.MonadHTTP m) => [m Bool]
 allHandlers =
   [loginAPIHandler,
@@ -116,22 +156,101 @@ allHandlers =
    rulesFrontEndHandler,
    proposalsFrontEndHandler,
    playersFrontEndHandler]
+   -}
 
 
-
-data RequestPattern =
+simpleRequestPattern :: String -> RequestPattern
+simpleRequestPattern method =
   RequestPattern {
-      requestPatternMethod :: String,
-      requestPatternPath :: [PathComponentPattern],
-      requestPatternIsDirectory :: Bool,
-      requestPatternQueryVariables :: Map.Map String (String -> Maybe Dynamic),
-      requestPatternFormVariables :: Map.Map String (String -> Maybe Dynamic)
+      requestPatternMethod = method,
+      requestPatternPath = [],
+      requestPatternTrailingSlash = True,
+      requestPatternQueryVariables = Map.empty,
+      requestPatternContent = NoRequestContentPattern
     }
 
 
-data PathComponentPattern
-  = ConstantPathComponentPattern String
-  | VariablePathComponentPattern String (String -> Maybe Dynamic)
+expectConstantPathComponent :: String -> RequestPattern -> RequestPattern
+expectConstantPathComponent component oldPattern =
+  let oldPath = requestPatternPath oldPattern
+      newPath = oldPath ++ [ConstantPathComponentPattern component]
+  in oldPattern {
+         requestPatternPath = newPath
+       }
+
+
+expectVariablePathComponent
+  :: String -> (String -> Maybe Dynamic) -> RequestPattern -> RequestPattern
+expectVariablePathComponent name parser oldPattern =
+  let oldPath = requestPatternPath oldPattern
+      newPath = oldPath ++ [VariablePathComponentPattern name parser]
+  in oldPattern {
+         requestPatternPath = newPath
+       }
+
+
+expectTrailingSlash :: RequestPattern -> RequestPattern
+expectTrailingSlash oldPattern =
+  oldPattern {
+      requestPatternTrailingSlash = True
+    }
+
+
+expectNoTrailingSlash :: RequestPattern -> RequestPattern
+expectNoTrailingSlash oldPattern =
+  oldPattern {
+      requestPatternTrailingSlash = False
+    }
+
+
+expectQueryVariable
+  :: String -> (String -> Maybe Dynamic) -> RequestPattern -> RequestPattern
+expectQueryVariable name parser oldPattern =
+  let oldMap = requestPatternQueryVariables oldPattern
+      newMap = Map.insert name parser oldMap
+  in oldPattern {
+         requestPatternQueryVariables = newMap
+       }
+
+
+expectNoContent :: RequestPattern -> RequestPattern
+expectNoContent oldPattern =
+  oldPattern {
+      requestPatternContent = NoRequestContentPattern
+    }
+
+
+expectJSONContent
+  :: String
+  -> (BS.ByteString -> Maybe Dynamic)
+  -> RequestPattern
+  -> RequestPattern
+expectJSONContent name parser oldPattern =
+  oldPattern {
+      requestPatternContent = JSONRequestContentPattern name parser
+    }
+
+
+{-
+getRequest :: (MonadHTTP m) => m Request
+getRequest = do
+  method <- HTTP.getRequestMethod
+  uri <- HTTP.getRequestURI
+  let (pathString, query) = break (\c -> c == '?') uri
+      pathString' = fromMaybe pathString $ stripPrefix "/" pathString
+      (pathString'', hasTrailingSlash) =
+        if isSuffixOf "/" pathString'
+          then (take (length pathString' - 1) pathString', True)
+          else (pathString', False)
+      query' = stripPrefix "?" query
+      pathStringLoop = 
+  return Request {
+             requestMethod = method,
+             requestPath :: [String],
+             requestHasTrailingSlash :: Bool,
+             requestQueryVariables :: Map.empty,
+             requestContent :: NoRequestContent
+           }
 
 
 whenRequestPattern
@@ -196,7 +315,7 @@ playersFrontEndHandler :: (MonadHTTP m) => m Bool
 
 
 {-
-/qmic/api/login?next=<href> POST
+/qmic/api/login POST
 /qmic/api/logout POST
 /qmic/api/confirm?code=<code> GET
 /qmic/api/account/email/ GET
@@ -216,12 +335,6 @@ playersFrontEndHandler :: (MonadHTTP m) => m Bool
 /qmic/api/proposal/<id> GET POST
 /qmic/api/proposal/<id>/delete POST
 /qmic/api/proposal/<id>/submit POST
-/qmic/login?next=<href> GET
-/qmic/logout GET POST
-/qmic/account GET
-/qmic/write GET
-/qmic/vote GET
-/qmic/rules GET
-/qmic/proposals GET
-/qmic/players GET
+/qmic/ GET
+-}
 -}
