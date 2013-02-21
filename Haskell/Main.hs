@@ -9,6 +9,8 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.Char as Char
 import qualified Data.Map as Map
+import qualified Data.UUID as UUID
+import qualified Data.Word as Word
 import qualified Database.SQLite.Simple as SQL
 import qualified Database.SQLite.Simple.FromRow as SQL
 import qualified Network.HTTP as HTTP
@@ -17,6 +19,7 @@ import qualified System.Environment as IO
 import qualified System.Exit as IO
 
 import Control.Applicative
+import Control.Exception.Lifted
 import Control.Monad
 import Data.Dynamic
 import Data.List
@@ -78,7 +81,7 @@ data PathComponentPattern
 
 data RequestContentPattern
   = NoRequestContentPattern
-  | JSONRequestContentPattern String (BS.ByteString -> Maybe Dynamic)
+  | JSONRequestContentPattern String
 
 
 getServerParameters :: Configuration -> IO HTTP.HTTPServerParameters
@@ -125,43 +128,10 @@ main = do
           serverParameters <- getServerParameters configuration
           HTTP.acceptLoop serverParameters $ do
             request <- getRequest
-            HTTP.httpPutStr $ "'" ++ show request ++ "'"
+            dispatchRequest request allHandlers
     _ -> do
       putStrLn $ "Usage: qmic configuration.json"
       IO.exitFailure
-
-
-{-
-allHandlers :: (HTTP.MonadHTTP m) => [m Bool]
-allHandlers =
-  [loginAPIHandler,
-   logoutAPIHandler,
-   confirmAPIHandler,
-   accountEmailListAPIHandler,
-   accountEmailDetailsAPIHandler,
-   accountEmailAddAPIHandler,
-   accountEmailDeleteAPIHandler,
-   accountEmailSetPrimaryAPIHandler,
-   playerListAPIHandler,
-   playerDetailsAPIHandler,
-   ruleListAPIHandler,
-   ruleDetailsAPIHandler,
-   proposalListAPIHandler,
-   proposalVoteAPIHandler,
-   proposalAddAPIHandler,
-   proposalDetailsAPIHandler,
-   proposalUpdateAPIHandler,
-   proposalDeleteAPIHandler,
-   proposalSubmitAPIHandler,
-   loginFrontEndHandler,
-   logoutFrontEndHandler,
-   accountFrontEndHandler,
-   writeFrontEndHandler,
-   voteFrontEndHandler,
-   rulesFrontEndHandler,
-   proposalsFrontEndHandler,
-   playersFrontEndHandler]
-   -}
 
 
 simpleRequestPattern :: String -> RequestPattern
@@ -227,12 +197,11 @@ expectNoContent oldPattern =
 
 expectJSONContent
   :: String
-  -> (BS.ByteString -> Maybe Dynamic)
   -> RequestPattern
   -> RequestPattern
-expectJSONContent name parser oldPattern =
+expectJSONContent name oldPattern =
   oldPattern {
-      requestPatternContent = JSONRequestContentPattern name parser
+      requestPatternContent = JSONRequestContentPattern name
     }
 
 
@@ -260,6 +229,97 @@ getRequest = do
              requestQueryVariables = queryVariables,
              requestContent = NoRequestContent
            }
+
+
+dispatchRequest
+  :: (HTTP.MonadHTTP m)
+  => Request
+  -> [(RequestPattern, Map.Map String Dynamic -> m ())]
+  -> m ()
+dispatchRequest request [] = do
+  HTTP.httpLog $ "No request-pattern matched."
+  HTTP.setResponseStatus 400
+dispatchRequest request ((pattern, handler) : rest) = do
+  case matchRequest request pattern of
+    Right variables -> handler variables
+    Left maybeMessage -> do
+      case maybeMessage of
+        Just message -> HTTP.httpLog message
+        Nothing -> return ()
+      dispatchRequest request rest
+
+
+matchRequest
+  :: Request
+  -> RequestPattern
+  -> Either (Maybe String) (Map.Map String Dynamic)
+matchRequest request pattern = do
+  if requestMethod request /= requestPatternMethod pattern
+    then Left Nothing
+    else do
+      uriVariables <-
+        foldM (\soFar (requestComponent, patternComponent) -> do
+                 case patternComponent of
+                   ConstantPathComponentPattern expectedComponent -> do
+                     if requestComponent == expectedComponent
+                       then return soFar
+                       else Left Nothing
+                   VariablePathComponentPattern name parser -> do
+                     case parser requestComponent of
+                       Nothing -> Left Nothing
+                       Just value -> return $ Map.insert name value soFar)
+             Map.empty
+             (zip (requestPath request) (requestPatternPath pattern))
+      if requestHasTrailingSlash request /= requestPatternTrailingSlash pattern
+        then Left Nothing
+        else do
+          let patternQueryVariables = requestPatternQueryVariables pattern
+              (expectedQueryVariables, unexpectedQueryVariables) =
+                partition (\(key, value) ->
+                              case Map.lookup key patternQueryVariables of
+                                Just _ -> True
+                                Nothing -> False)
+                          (Map.toList $ requestQueryVariables request)
+          case map fst unexpectedQueryVariables of
+            [key] ->
+              Left $ Just $ "Unexpected query variable " ++ key ++ "."
+            keys@(_ : _) ->
+              Left $ Just $ "Unexpected query variables "
+                            ++ englishList keys
+                            ++ "."
+            [] -> do
+              let queryVariables = Map.fromList expectedQueryVariables
+                  missingQueryVariables =
+                    Map.difference patternQueryVariables queryVariables
+              case map fst $ Map.toList missingQueryVariables of
+                [key] ->
+                  Left $ Just $ "Missing query variable " ++ key ++ "."
+                keys@(_ : _) ->
+                  Left $ Just $ "Missing query variables "
+                                ++ englishList keys
+                                ++ "."
+                [] -> do
+                  let visit key value = do
+                        case Map.lookup key patternQueryVariables of
+                          Nothing -> Left Nothing
+                          Just parser ->
+                            case parser value of
+                              Nothing -> Left Nothing
+                              Just result -> return (key, result)
+                  queryVariables <-
+                    mapM (\(key, value) -> visit key value)
+                         (Map.toList queryVariables)
+                    >>= return . Map.fromList
+                  return $ foldl' Map.union
+                                  Map.empty
+                                  [uriVariables, queryVariables]
+
+
+englishList :: [String] -> String
+englishList [] = "(none)"
+englishList [item] = item
+englishList [item1, item2] = item1 ++ " and " ++ item2
+englishList items = intercalate ", " (init items ++ ["and " ++ last items])
 
 
 decodeFormVariables :: String -> Map.Map String String
@@ -300,89 +360,345 @@ decodeFormVariables input =
   in result
 
 
-{-
-whenRequestPattern
+allHandlers
   :: (HTTP.MonadHTTP m)
-  => RequestPattern
-  -> (Map String Dynamic -> m Bool)
-  -> m Bool
-whenRequestPattern pattern handler = do
-  method <- HTTP.getRequestMethod
-  if method /= requestPatternMethod pattern
-    then return False
-    else do
-      uri <- HTTP.getRequestURI
+  => [(RequestPattern, Map.Map String Dynamic -> m ())]
+allHandlers =
+  let infixl 1 $>>
+      infixl 2 >>>
+      ($>>) :: RequestPattern
+            -> (RequestPattern -> RequestPattern)
+            -> RequestPattern
+      ($>>) = flip ($)
+      (>>>) :: (RequestPattern -> RequestPattern)
+            -> (RequestPattern -> RequestPattern)
+            -> (RequestPattern -> RequestPattern)
+      (>>>) = flip (.)
+      prefix :: RequestPattern -> RequestPattern
+      prefix = expectConstantPathComponent "qmic"
+      apiPrefix :: RequestPattern -> RequestPattern
+      apiPrefix = prefix >>> expectConstantPathComponent "api"
+      frontEndPrefix :: RequestPattern -> RequestPattern
+      frontEndPrefix = prefix
+  in [(simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "login"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       loginAPIHandler),
+      
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "logout"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       logoutAPIHandler),
+      
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "confirm"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       confirmAPIHandler),
+      
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "account"
+       >>> expectConstantPathComponent "email"
+       >>> expectTrailingSlash
+       >>> expectJSONContent "json",
+       accountEmailListAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "account"
+       >>> expectConstantPathComponent "email"
+       >>> expectVariablePathComponent "email" emailParser
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       accountEmailAddAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "account"
+       >>> expectConstantPathComponent "email"
+       >>> expectVariablePathComponent "email" emailParser
+       >>> expectConstantPathComponent "delete"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       accountEmailDeleteAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "account"
+       >>> expectConstantPathComponent "email"
+       >>> expectVariablePathComponent "email" emailParser
+       >>> expectConstantPathComponent "primary"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       accountEmailSetPrimaryAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "player"
+       >>> expectTrailingSlash
+       >>> expectJSONContent "json",
+       playerListAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "rule"
+       >>> expectTrailingSlash
+       >>> expectJSONContent "json",
+       ruleListAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "proposal"
+       >>> expectTrailingSlash
+       >>> expectJSONContent "json",
+       proposalListAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "proposal"
+       >>> expectConstantPathComponent "vote"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       proposalVoteAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "proposal"
+       >>> expectConstantPathComponent "add"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       proposalAddAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "proposal"
+       >>> expectVariablePathComponent "proposal_id" uuidParser
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       proposalDetailsAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "proposal"
+       >>> expectVariablePathComponent "proposal_id" uuidParser
+       >>> expectConstantPathComponent "update"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       proposalUpdateAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "proposal"
+       >>> expectVariablePathComponent "proposal_id" uuidParser
+       >>> expectConstantPathComponent "delete"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       proposalDeleteAPIHandler),
+       
+      (simpleRequestPattern "POST" $>> apiPrefix
+       >>> expectConstantPathComponent "proposal"
+       >>> expectVariablePathComponent "proposal_id" uuidParser
+       >>> expectConstantPathComponent "submit"
+       >>> expectNoTrailingSlash
+       >>> expectJSONContent "json",
+       proposalSubmitAPIHandler),
+       
+      (simpleRequestPattern "GET" $>> frontEndPrefix
+       >>> expectTrailingSlash
+       >>> expectNoContent,
+       frontEndHandler),
+       
+      (simpleRequestPattern "GET" $>> frontEndPrefix
+       >>> expectConstantPathComponent "confirm"
+       >>> expectNoTrailingSlash
+       >>> expectQueryVariable "code" confirmationCodeParser
+       >>> expectNoContent,
+       frontEndConfirmHandler)]
 
 
-loginAPIHandler :: (HTTP.MonadHTTP m) => m Bool
-loginAPIHandler =
-  whenRequestPattern
-    (RequestPattern {
-         requestPatternMethod = "GET,
-         requestPatternPath =
-           uriPrefix
-           ++ [ConstantPathComponentPattern "api",
-               ConstantPathComponentPattern "login"]
-         requestPatternIsDirectory = False,
-         requestPatternQueryVariables =
-           Map.fromList [("next", absoluteLocalURIDecoder)],
-         requestPatternFormVariables =
-           Map.fromList [("username", nonemptyTextDecoder),
-                         ("password", nonemptyTextDecoder)]
-       })
-    $ \variables -> do
-       httpLog "Login attempt"
+emailParser :: String -> Maybe Dynamic
+emailParser input = do
+  return $ toDyn input
 
 
-logoutAPIHandler :: (MonadHTTP m) => m Bool
-confirmAPIHandler :: (MonadHTTP m) => m Bool
-accountEmailListAPIHandler :: (MonadHTTP m) => m Bool
-accountEmailDetailsAPIHandler :: (MonadHTTP m) => m Bool
-accountEmailAddAPIHandler :: (MonadHTTP m) => m Bool
-accountEmailDeleteAPIHandler :: (MonadHTTP m) => m Bool
-accountEmailSetPrimaryAPIHandler :: (MonadHTTP m) => m Bool
-playerListAPIHandler :: (MonadHTTP m) => m Bool
-playerDetailsAPIHandler :: (MonadHTTP m) => m Bool
-ruleListAPIHandler :: (MonadHTTP m) => m Bool
-ruleDetailsAPIHandler :: (MonadHTTP m) => m Bool
-proposalListAPIHandler :: (MonadHTTP m) => m Bool
-proposalVoteAPIHandler :: (MonadHTTP m) => m Bool
-proposalAddAPIHandler :: (MonadHTTP m) => m Bool
-proposalDetailsAPIHandler :: (MonadHTTP m) => m Bool
-proposalUpdateAPIHandler :: (MonadHTTP m) => m Bool
-proposalDeleteAPIHandler :: (MonadHTTP m) => m Bool
-proposalSubmitAPIHandler :: (MonadHTTP m) => m Bool
-loginFrontEndHandler :: (MonadHTTP m) => m Bool
-logoutFrontEndHandler :: (MonadHTTP m) => m Bool
-accountFrontEndHandler :: (MonadHTTP m) => m Bool
-writeFrontEndHandler :: (MonadHTTP m) => m Bool
-voteFrontEndHandler :: (MonadHTTP m) => m Bool
-rulesFrontEndHandler :: (MonadHTTP m) => m Bool
-proposalsFrontEndHandler :: (MonadHTTP m) => m Bool
-playersFrontEndHandler :: (MonadHTTP m) => m Bool
+uuidParser :: String -> Maybe Dynamic
+uuidParser input = do
+  uuid <- case reads input of
+            [(uuid, "")] -> return uuid
+            _ -> Nothing
+  return $ toDyn (uuid :: UUID.UUID)
 
 
-{-
-/qmic/api/login POST
-/qmic/api/logout POST
-/qmic/api/confirm?code=<code> GET
-/qmic/api/account/email/ GET
-/qmic/api/account/email/<email> GET
-/qmic/api/account/email/<email>/delete POST
-/qmic/api/account/email/<email>/primary POST
-/qmic/api/player/ GET
-/qmic/api/player/<id> GET
-/qmic/api/rule/ GET
-/qmic/api/rule/<id> GET
-/qmic/api/proposal/ GET
-/qmic/api/proposal/active/ GET
-/qmic/api/proposal/passed/ GET
-/qmic/api/proposal/failed/ GET
-/qmic/api/proposal/vote POST
-/qmic/api/proposal/add POST
-/qmic/api/proposal/<id> GET POST
-/qmic/api/proposal/<id>/delete POST
-/qmic/api/proposal/<id>/submit POST
-/qmic/ GET
--}
--}
+confirmationCodeParser :: String -> Maybe Dynamic
+confirmationCodeParser input =
+  decodeConfirmationCode input >>= return . toDyn
+
+
+encodeConfirmationCode :: Bool -> BS.ByteString -> Maybe String
+encodeConfirmationCode spaced byteString = do
+  let (string, _, _) =
+        foldl' (\(soFar, sum, nBits) byte ->
+                   let sum' = Bits.shiftL sum 8 + fromIntegral byte
+                       encode n = confirmationCodeCharacters !! n
+                       takeSome (soFar, sum, nBits) =
+                         if nBits >= 5
+                           then takeSome
+                                  (soFar ++ [encode $
+                                              Bits.shiftR sum (nBits - 5)],
+                                   sum Bits..&.
+                                     (Bits.shiftR 1 (nBits - 5) - 1),
+                                   nBits - 5)
+                           else (soFar, sum, nBits)
+                   in takeSome (soFar, sum', nBits + 8))
+               ("" :: String, 0 :: Int, 0 :: Int)
+               (BS.unpack byteString)
+  if spaced
+    then do
+      let group1 = take 4 string
+          group2 = take 4 $ drop 4 string
+          group3 = take 4 $ drop 8 string
+          group4 = drop 12 string
+          spaced = group1 ++ " " ++ group2 ++ " " ++ group3 ++ " " ++ group4
+      return spaced
+    else return string
+
+
+decodeConfirmationCode :: String -> Maybe BS.ByteString
+decodeConfirmationCode string = do
+  let bitBundles =
+        foldl' (\soFar c ->
+                  case elemIndex (Char.toLower c) confirmationCodeCharacters of
+                    Nothing -> soFar
+                    Just bitBundle -> soFar ++ [bitBundle])
+               []
+               string
+  if length bitBundles /= 16
+    then Nothing
+    else return ()
+  let (bytes, _, _) =
+        foldl' (\(bytes, sum, nBits) bitBundle ->
+                   let sum' = Bits.shiftL sum 5 + bitBundle
+                   in if nBits + 5 >= 8
+                       then (bytes ++ [fromIntegral $ sum' Bits..&. 0xFF],
+                             Bits.shiftR sum' 8,
+                             nBits + 5 - 8)
+                       else (bytes, sum', nBits + 5))
+               ([] :: [Word.Word8], 0 :: Int, 0 :: Int)
+               bitBundles
+  return $ BS.pack bytes
+
+
+confirmationCodeCharacters :: String
+confirmationCodeCharacters = "23456789abcdefghjkmnpqrstuvwxyz"
+
+
+loginAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+loginAPIHandler variables = do
+  HTTP.httpPutStr $ "Login placeholder."
+
+
+logoutAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+logoutAPIHandler variables = do
+  HTTP.httpPutStr $ "Logout placeholder."
+
+
+confirmAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+confirmAPIHandler variables = do
+  HTTP.httpPutStr $ "Confirm placeholder."
+
+
+accountEmailListAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+accountEmailListAPIHandler variables = do
+  HTTP.httpPutStr $ "Account email list placeholder."
+
+
+accountEmailAddAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+accountEmailAddAPIHandler variables = do
+  HTTP.httpPutStr $ "Account email add placeholder."
+
+
+accountEmailDeleteAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+accountEmailDeleteAPIHandler variables = do
+  HTTP.httpPutStr $ "Account email delete placeholder."
+
+
+accountEmailSetPrimaryAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+accountEmailSetPrimaryAPIHandler variables = do
+  HTTP.httpPutStr $ "Account email set primary placeholder."
+
+
+playerListAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+playerListAPIHandler variables = do
+  HTTP.httpPutStr $ "Player list placeholder."
+
+
+ruleListAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+ruleListAPIHandler variables = do
+  HTTP.httpPutStr $ "Rule list placeholder."
+
+
+proposalListAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+proposalListAPIHandler variables = do
+  HTTP.httpPutStr $ "Proposal list placeholder."
+
+
+proposalVoteAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+proposalVoteAPIHandler variables = do
+  HTTP.httpPutStr $ "Proposal vote placeholder."
+
+
+proposalAddAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+proposalAddAPIHandler variables = do
+  HTTP.httpPutStr $ "Proposal add placeholder."
+
+
+proposalDetailsAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+proposalDetailsAPIHandler variables = do
+  HTTP.httpPutStr $ "Proposal details placeholder."
+
+
+proposalUpdateAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+proposalUpdateAPIHandler variables = do
+  HTTP.httpPutStr $ "Proposal update placeholder."
+
+
+proposalDeleteAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+proposalDeleteAPIHandler variables = do
+  HTTP.httpPutStr $ "Proposal delete placeholder."
+
+
+proposalSubmitAPIHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+proposalSubmitAPIHandler variables = do
+  HTTP.httpPutStr $ "Proposal submit placeholder."
+
+
+frontEndHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+frontEndHandler variables = do
+  HTTP.setResponseHeader HTTP.HttpTransferEncoding "chunked"
+  HTTP.httpPutStr $ "Front-end placeholder."
+
+
+frontEndConfirmHandler
+  :: (HTTP.MonadHTTP m) => Map.Map String Dynamic -> m ()
+frontEndConfirmHandler variables = do
+  HTTP.setResponseHeader HTTP.HttpTransferEncoding "chunked"
+  let maybeCode :: Maybe BS.ByteString
+      maybeCode = Map.lookup "code" variables >>= fromDynamic
+  case maybeCode of
+    Nothing -> HTTP.httpCloseOutput
+    Just code -> do
+      HTTP.httpPutStr $ "Front-end confirm placeholder."
+                        ++ "\n" ++ (show $ encodeConfirmationCode True code)
+                        ++ "\n" ++ "http://ireneknapp.com/qmic/confirm?code="
+                        ++ (show $ encodeConfirmationCode False code)
+                        ++ "\n" ++ (show $ encodeConfirmationCode True
+                                     $ BS.pack $ take 16 $ repeat 0xAA)
+
