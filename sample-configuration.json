@@ -1,0 +1,18 @@
+{
+"process": {
+  "user": "irene",
+  "group": "irene"
+},
+"network": {
+  "port": 8090
+},
+"files": {
+  "database": "/var/www/direct-web-bug.db"
+},
+"access": {
+  "password-sha1": "fa9beb99e4029ad5a6615399e7bbae21356086b3"
+},
+"service": {
+  "path": "/debug"
+}
+}
