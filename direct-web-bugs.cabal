@@ -1,6 +1,6 @@
 name: direct-web-bugs
 version: 1.0
-cabal-version: >= 1.6
+cabal-version: >= 1.10
 build-type: Simple
 license: BSD3
 license-file: LICENSE
@@ -11,7 +11,6 @@ homepage: http://ireneknapp.com/software/
 bug-reports: https://github.com/IreneKnapp/direct-sqlite/issues/new
 category: Web
 synopsis: Debugging aid for testing HTTP-based APIs.
-Cabal-version: >= 1.10
 Build-type: Simple
 description:
   This package runs as a web server which provides a single page at a
@@ -46,3 +45,4 @@ Executable direct-web-bugs
                  mtl >= 2.1 && < 3,
                  system-uuid >= 2.1.1 && < 3,
                  text >= 0.11.2.1 && < 1
+  default-language: Haskell2010
