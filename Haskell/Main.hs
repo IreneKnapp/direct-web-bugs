@@ -28,21 +28,90 @@ import Data.Maybe
 
 data Configuration =
   Configuration {
-      configurationDatabasePath :: FilePath,
-      configurationPort :: Int,
-      configurationAccessLogPath :: Maybe FilePath,
-      configurationErrorLogPath :: Maybe FilePath,
-      configurationUser :: Maybe String,
-      configurationGroup :: Maybe String
+      configurationProcess :: ProcessConfiguration,
+      configurationNetwork :: NetworkConfiguration,
+      configurationFiles :: FilesConfiguration,
+      configurationAccess :: AccessConfiguration,
+      configurationService :: ServiceConfiguration
     }
 instance JSON.FromJSON Configuration where
   parseJSON (JSON.Object value) =
-    Configuration <$> value JSON..: "database"
-                  <*> value JSON..: "port"
-                  <*> value JSON..:? "access-log"
-                  <*> value JSON..:? "error-log"
-                  <*> value JSON..:? "user"
-                  <*> value JSON..:? "group"
+    Configuration <$> value JSON..: "process"
+                  <*> value JSON..: "network"
+                  <*> value JSON..: "files"
+                  <*> value JSON..: "access"
+                  <*> value JSON..: "service"
+  parseJSON _ = mzero
+
+
+data ProcessConfiguration =
+  ProcessConfiguration {
+      processConfigurationUser :: Maybe String,
+      processConfigurationGroup :: Maybe String
+    }
+instance JSON.FromJSON ProcessConfiguration where
+  parseJSON (JSON.Object value) =
+    ProcessConfiguration <$> value JSON..:? "user"
+                         <*> value JSON..:? "group"
+  parseJSON _ = mzero
+
+
+data NetworkConfiguration =
+  NetworkConfiguration {
+      networkConfigurationPort :: Int
+    }
+instance JSON.FromJSON NetworkConfiguration where
+  parseJSON (JSON.Object value) =
+    NetworkConfiguration <$> value JSON..: "port"
+  parseJSON _ = mzero
+
+
+data FilesConfiguration =
+  FilesConfiguration {
+      filesConfigurationDatabasePath :: FilePath
+    }
+instance JSON.FromJSON FilesConfiguration where
+  parseJSON (JSON.Object value) =
+    FilesConfiguration <$> value JSON..: "database"
+  parseJSON _ = mzero
+
+
+data AccessConfiguration =
+  AccessConfiguration {
+      accessConfigurationPasswordSHA1 :: Maybe BS.ByteString
+    }
+instance JSON.FromJSON AccessConfiguration where
+  parseJSON (JSON.Object value) = do
+    let decodeBlob maybeString = do
+          case maybeString of
+            Nothing -> return Nothing
+            Just string -> do
+              let nibbles = computeNibbles string
+              if length nibbles /= 40
+                then mzero
+                else return $ Just $ BS.pack $ computeBytes nibbles
+        computeNibbles string =
+          foldl' (\soFar c ->
+                    case elemIndex (Char.toLower c) "0123456789abcdef" of
+                      Nothing -> soFar
+                      Just nibble -> soFar ++ [fromIntegral nibble])
+                 []
+                 string
+        computeBytes [] = []
+        computeBytes (high : low : rest) =
+          (Bits.shiftL high 4 Bits..|. low) : computeBytes rest
+    passwordSHA1 <- value JSON..:? "password-sha1" >>= decodeBlob
+    AccessConfiguration <$> pure passwordSHA1
+  parseJSON _ = mzero
+
+
+data ServiceConfiguration =
+  ServiceConfiguration {
+      serviceConfigurationPath :: String
+    }
+instance JSON.FromJSON ServiceConfiguration where
+  parseJSON (JSON.Object value) =
+    ServiceConfiguration <$> value JSON..: "path"
   parseJSON _ = mzero
 
 
@@ -86,24 +155,22 @@ data RequestContentPattern
 
 getServerParameters :: Configuration -> IO HTTP.HTTPServerParameters
 getServerParameters configuration = do
-  let port =
-        (Bits.shiftL ((fromIntegral $ configurationPort configuration)
-                      Bits..&. 0xFF) 8)
-        Bits..|. (Bits.shiftR (fromIntegral $ configurationPort configuration)
-                              8 Bits..&. 0xFF)
+  let portIn = fromIntegral $ networkConfigurationPort $
+                configurationNetwork configuration
+      port =
+        (Bits.shiftL (portIn Bits..&. 0xFF) 8)
+        Bits..|. (Bits.shiftR portIn 8 Bits..&. 0xFF)
       address = Net.SockAddrInet (Net.PortNum port) 0x0100007F
   return $
     HTTP.HTTPServerParameters {
-        HTTP.serverParametersAccessLogPath =
-          configurationAccessLogPath configuration,
-        HTTP.serverParametersErrorLogPath =
-          configurationErrorLogPath configuration,
+        HTTP.serverParametersAccessLogPath = Nothing,
+        HTTP.serverParametersErrorLogPath = Nothing,
         HTTP.serverParametersDaemonize =
           True,
         HTTP.serverParametersUserToChangeTo =
-          configurationUser configuration,
+          processConfigurationUser $ configurationProcess configuration,
         HTTP.serverParametersGroupToChangeTo =
-          configurationGroup configuration,
+          processConfigurationGroup $ configurationProcess configuration,
         HTTP.serverParametersForkPrimitive =
           Concurrent.forkIO,
         HTTP.serverParametersListenSockets =
