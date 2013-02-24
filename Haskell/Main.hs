@@ -3,6 +3,7 @@ module Main (main) where
 
 import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad.State.Strict as MTL
+import Data.Aeson ((.:), (.:?))
 import qualified Data.Aeson as JSON
 import qualified Data.Bits as Bits
 import qualified Data.ByteString as BS
@@ -36,11 +37,11 @@ data Configuration =
     }
 instance JSON.FromJSON Configuration where
   parseJSON (JSON.Object value) =
-    Configuration <$> value JSON..: "process"
-                  <*> value JSON..: "network"
-                  <*> value JSON..: "files"
-                  <*> value JSON..: "access"
-                  <*> value JSON..: "service"
+    Configuration <$> value .: "process"
+                  <*> value .: "network"
+                  <*> value .: "files"
+                  <*> value .: "access"
+                  <*> value .: "service"
   parseJSON _ = mzero
 
 
@@ -51,8 +52,8 @@ data ProcessConfiguration =
     }
 instance JSON.FromJSON ProcessConfiguration where
   parseJSON (JSON.Object value) =
-    ProcessConfiguration <$> value JSON..:? "user"
-                         <*> value JSON..:? "group"
+    ProcessConfiguration <$> value .:? "user"
+                         <*> value .:? "group"
   parseJSON _ = mzero
 
 
@@ -62,7 +63,7 @@ data NetworkConfiguration =
     }
 instance JSON.FromJSON NetworkConfiguration where
   parseJSON (JSON.Object value) =
-    NetworkConfiguration <$> value JSON..: "port"
+    NetworkConfiguration <$> value .: "port"
   parseJSON _ = mzero
 
 
@@ -72,7 +73,7 @@ data FilesConfiguration =
     }
 instance JSON.FromJSON FilesConfiguration where
   parseJSON (JSON.Object value) =
-    FilesConfiguration <$> value JSON..: "database"
+    FilesConfiguration <$> value .: "database"
   parseJSON _ = mzero
 
 
@@ -100,7 +101,7 @@ instance JSON.FromJSON AccessConfiguration where
         computeBytes [] = []
         computeBytes (high : low : rest) =
           (Bits.shiftL high 4 Bits..|. low) : computeBytes rest
-    passwordSHA1 <- value JSON..:? "password-sha1" >>= decodeBlob
+    passwordSHA1 <- value .:? "password-sha1" >>= decodeBlob
     AccessConfiguration <$> pure passwordSHA1
   parseJSON _ = mzero
 
@@ -111,7 +112,7 @@ data ServiceConfiguration =
     }
 instance JSON.FromJSON ServiceConfiguration where
   parseJSON (JSON.Object value) =
-    ServiceConfiguration <$> value JSON..: "path"
+    ServiceConfiguration <$> value .: "path"
   parseJSON _ = mzero
 
 
@@ -426,21 +427,21 @@ decodeFormVariables input =
       unescape soFar (c : rest) = unescape (soFar ++ [c]) rest
   in result
 
+infixl 1 $>>
+infixl 2 >>>
+($>>) :: RequestPattern
+      -> (RequestPattern -> RequestPattern)
+      -> RequestPattern
+($>>) = flip ($)
+(>>>) :: (RequestPattern -> RequestPattern)
+      -> (RequestPattern -> RequestPattern)
+      -> (RequestPattern -> RequestPattern)
+(>>>) = flip (.)
 
 allHandlers
   :: (HTTP.MonadHTTP m)
   => [(RequestPattern, Map.Map String Dynamic -> m ())]
 allHandlers =
-  let infixl 1 $>>
-      infixl 2 >>>
-      ($>>) :: RequestPattern
-            -> (RequestPattern -> RequestPattern)
-            -> RequestPattern
-      ($>>) = flip ($)
-      (>>>) :: (RequestPattern -> RequestPattern)
-            -> (RequestPattern -> RequestPattern)
-            -> (RequestPattern -> RequestPattern)
-      (>>>) = flip (.)
       prefix :: RequestPattern -> RequestPattern
       prefix = expectConstantPathComponent "qmic"
       apiPrefix :: RequestPattern -> RequestPattern
