@@ -116,44 +116,6 @@ instance JSON.FromJSON ServiceConfiguration where
   parseJSON _ = mzero
 
 
-data Request =
-  Request {
-      requestMethod :: String,
-      requestPath :: [String],
-      requestHasTrailingSlash :: Bool,
-      requestQueryVariables :: Map.Map String String,
-      requestContent :: RequestContent
-    }
-  deriving (Show)
-
-
-data RequestContent
-  = NoRequestContent
-  | JSONRequestContent BS.ByteString
-  | UnknownRequestContent
-  deriving (Show)
-
-
-data RequestPattern =
-  RequestPattern {
-      requestPatternMethod :: String,
-      requestPatternPath :: [PathComponentPattern],
-      requestPatternTrailingSlash :: Bool,
-      requestPatternQueryVariables :: Map.Map String (String -> Maybe Dynamic),
-      requestPatternContent :: RequestContentPattern
-    }
-
-
-data PathComponentPattern
-  = ConstantPathComponentPattern String
-  | VariablePathComponentPattern String (String -> Maybe Dynamic)
-
-
-data RequestContentPattern
-  = NoRequestContentPattern
-  | JSONRequestContentPattern String
-
-
 getServerParameters :: Configuration -> IO HTTP.HTTPServerParameters
 getServerParameters configuration = do
   let portIn = fromIntegral $ networkConfigurationPort $
@@ -218,3 +180,8 @@ uuidParser input = do
 handleGetRequest :: (HTTP.MonadHTTP m) => m ()
 handleGetRequest = do
   HTTP.httpPutStr $ "GET placeholder."
+
+
+handleGetRequest :: (HTTP.MonadHTTP m) => m ()
+handleGetRequest = do
+  HTTP.httpPutStr $ "POST placeholder."
