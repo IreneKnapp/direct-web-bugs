@@ -18,8 +18,7 @@ import qualified Network.HTTP as HTTP
 import qualified Network.Socket as Net
 import qualified System.Environment as IO
 import qualified System.Exit as IO
-
-import qualified Text.Blaze.Html as B
+import qualified Text.Blaze.Html.Renderer.Utf8 as HTML
 
 import Control.Applicative
 import Control.Exception.Lifted
@@ -27,6 +26,8 @@ import Control.Monad
 import Data.Dynamic
 import Data.List
 import Data.Maybe
+
+import HTML
 
 
 data Configuration =
@@ -128,8 +129,12 @@ getServerParameters configuration = do
       address = Net.SockAddrInet (Net.PortNum port) 0x0100007F
   return $
     HTTP.HTTPServerParameters {
-        HTTP.serverParametersAccessLogPath = Nothing,
-        HTTP.serverParametersErrorLogPath = Nothing,
+        HTTP.serverParametersAccessLogPath =
+          Nothing,
+          -- Just "/Users/irene/Projects/Active/direct-web-bugs/access.log",
+        HTTP.serverParametersErrorLogPath =
+          Nothing,
+          -- Just "/Users/irene/Projects/Active/direct-web-bugs/error.log",
         HTTP.serverParametersDaemonize =
           True,
         HTTP.serverParametersUserToChangeTo =
@@ -168,7 +173,7 @@ main = do
               "POST" | path == expectedPath -> handlePostRequest
               _ -> HTTP.setResponseStatus 404
     _ -> do
-      putStrLn $ "Usage: qmic configuration.json"
+      putStrLn $ "Usage: direct-web-bugs configuration.json"
       IO.exitFailure
 
 
@@ -181,9 +186,10 @@ uuidParser input = do
 
 handleGetRequest :: (HTTP.MonadHTTP m) => m ()
 handleGetRequest = do
-  HTTP.httpPutStr $ "GET placeholder."
+  HTTP.setResponseHeader HTTP.HttpContentType "text/html; charset=utf-8"
+  HTTP.httpPut $ BS.concat $ LBS.toChunks $ HTML.renderHtml userPage
 
 
-handleGetRequest :: (HTTP.MonadHTTP m) => m ()
-handleGetRequest = do
+handlePostRequest :: (HTTP.MonadHTTP m) => m ()
+handlePostRequest = do
   HTTP.httpPutStr $ "POST placeholder."
