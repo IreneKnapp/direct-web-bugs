@@ -19,6 +19,8 @@ import qualified Network.Socket as Net
 import qualified System.Environment as IO
 import qualified System.Exit as IO
 
+import qualified Text.Blaze.Html as B
+
 import Control.Applicative
 import Control.Exception.Lifted
 import Control.Monad
