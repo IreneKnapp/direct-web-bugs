@@ -123,6 +123,11 @@ ul#source-list li > .name {
   -webkit-user-drag: element;
 }
 
+ul#source-list li > .name.active {
+  background-color: #606060;
+  color: white;
+}
+
 ul#source-list li.folder > .name {
   -webkit-user-drop: element;
 }
@@ -321,6 +326,20 @@ div#content > div > div.toolbar > input[type=button] {
   box-shadow: none;
 }
 
+div#superposed {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+}
+
+div#superposed .drop-mark {
+  content: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9Ii00LjE0MyAtMC43NzQgMjQgMjQiDQoJIG92ZXJmbG93PSJ2aXNpYmxlIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IC00LjE0MyAtMC43NzQgMjQgMjQiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8cGF0aCBmaWxsPSIjODBGRjgwIiBkPSJNMTUuNzE1LDExLjIyNmMwLDEwLjMyMy0xLjI2OCwxMS4wOTQtNy4zOTUsMTEuMDk0UzAsMjEuOTM0LDAsMTEuMjI2QzAsMC41MTgsMi4xOTMsMC4xMzIsOC4zMiwwLjEzMg0KCVMxNS43MTUsMC44NjQsMTUuNzE1LDExLjIyNnoiLz4NCjxnPg0KCTxnPg0KCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiM4MDgwODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTQuODU3IiB5MT0iMTEuMjI2IiB4Mj0iNi44NTciIHkyPSIxMS4yMjYiLz4NCgkJPGc+DQoJCQk8cGF0aCBmaWxsPSIjODA4MDgwIiBkPSJNMC45MjQsMTEuMjI2YzIuODQtMS4wNTQsNi4zNjMtMi44NTIsOC41NDctNC43NTZsLTEuNzIsNC43NTZsMS43Miw0Ljc1NQ0KCQkJCUM3LjI4NywxNC4wNzcsMy43NjQsMTIuMjc5LDAuOTI0LDExLjIyNnoiLz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMC44NTciIHkxPSI1LjIyNiIgeDI9IjguODU3IiB5Mj0iNS4yMjYiLz4NCgkJPGc+DQoJCQk8cGF0aCBkPSJNMTQuNzkxLDQuNzU1Yy0yLjg0LDEuMDU0LTYuMzYzLDIuODUyLTguNTQ3LDQuNzU2bDEuNzItNC43NTZMNi4yNDQsMEM4LjQyOCwxLjkwNCwxMS45NTEsMy43MDIsMTQuNzkxLDQuNzU1eiIvPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPGc+DQoJCTxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzgwODA4MCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSIxNC44NTciIHkxPSIxNy4yMjYiIHgyPSI2Ljg1NyIgeTI9IjE3LjIyNiIvPg0KCQk8Zz4NCgkJCTxwYXRoIGZpbGw9IiM4MDgwODAiIGQ9Ik0wLjkyNCwxNy42OThjMi44NC0xLjA1NCw2LjM2My0yLjg1Miw4LjU0Ny00Ljc1NmwtMS43Miw0Ljc1NmwxLjcyLDQuNzU1DQoJCQkJQzcuMjg3LDIwLjU0OCwzLjc2NCwxOC43NSwwLjkyNCwxNy42OTh6Ii8+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8L3N2Zz4NCg==');
+}
+
 span.timestamp {
   font-size: 50%;
   font-weight: normal;
@@ -335,6 +354,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
 (function() {
 
 var draggedItem;
+var proposedDragTarget;
 var collapseOnDragEnd;
 var expandOnDragEnd;
 
@@ -343,15 +363,6 @@ function setup() {
     $("div#content").click(defocusSourceList);
     $("ul#source-list li > .name").on("mousedown", select);
     $("ul#source-list li.folder > .name").dblclick(toggleExpansion);
-    /*
-    $("ul#source-list li > .name").on("dragstart", dragStart);
-    $("ul#source-list li > .name").on("drag", drag);
-    $("ul#source-list li > .name").on("dragend", dragEnd);
-    $("body").on("dragover", dragOver);
-    $("ul#source-list").on("dragenter", dragEnter);
-    $("ul#source-list li > .name").on("dragenter", dragEnter);
-    $("ul#source-list ul").on("dragenter", dragEnter);
-    */
     document.body.addEventListener("dragstart", dragStart);
     document.body.addEventListener("dragend", dragEnd);
     document.body.addEventListener("dragover", dragOver);
@@ -460,16 +471,19 @@ function dragStart(event) {
             } else {
                 event.dataTransfer.effectAllowed = "move";
             }
+
+            proposedDragTarget = null;
+            collapseOnDragEnd = [];
             expandOnDragEnd = [];
             
             var item = $(event.target).parent("li");
             if(item.hasClass("folder") && item.hasClass("expanded")) {
-                expandOnDragEnd.push(event.target);
+                expandOnDragEnd.push($(event.target));
                 setTimeout(function() { toggleExpansion(event); }, 0);
             } else {
             }
             
-            item.css({ opacity: 0.25 });
+            item.css({ color: "#404040" });
 
             draggedItem = item;
         }
@@ -481,13 +495,16 @@ function dragEnd(event) {
     var item = $(event.target).parent("li");
     
     item.removeAttr("style");
+
+    $(".active").removeClass("active");
+    $(".drop-mark").hide();
     
     for(var i in collapseOnDragEnd)
     {
         var folder = collapseOnDragEnd[i];
         collapse(folder);
     }
-
+    
     for(var i in expandOnDragEnd)
     {
         var folder = expandOnDragEnd[i];
@@ -496,32 +513,124 @@ function dragEnd(event) {
 }
 
 
-function dragOver(event) {
+function isNewRequest(item) {
+    return item.parent().is("ul#source-list li.request.new-request");
+}
+
+
+function isInRecentRequests(item) {
+    return item.parents().is("ul#source-list li.folder.recent-requests");
+}
+
+
+function getActualTarget(event) {
+    var targetItem = $(event.target);
     if(draggedItem && (draggedItem.parents("ul#source-list").length > 0)) {
-        if($(event.target).parents().andSelf().is("ul#source-list")) {
-            if(draggedItem.parents().is("li.folder.recent-requests")) {
-                event.dataTransfer.dropEffect = "copy";
-            } else if(draggedItem.parent().is("li.request.new-request")) {
-                event.dataTransfer.dropEffect = "copy";
+        if(targetItem.parents().andSelf().is("ul#source-list")) {
+            var operation;
+            if($.contains(targetItem, draggedItem)
+               || isNewRequest(targetItem)
+               || isInRecentRequests(targetItem))
+            {
+                return { operation: "none" };
+            } else if(isNewRequest(draggedItem)
+                      || isInRecentRequests(draggedItem))
+            {
+                operation = "copy";
             } else {
-                event.dataTransfer.dropEffect = "move";
+                operation = "move";
+            }
+
+            if(targetItem.is("ul#source-list li.folder > .name")) {
+                return {
+                    operation: operation,
+                    target: targetItem,
+                    index: 0,
+                };
+            } else if(targetItem.is("ul#source-list li.request > .name")) {
+                targetFolder =
+                    targetItem.closest("ul#source-list li.folder")
+                    .children(".name");
+                var index = targetFolder.next("ul").children("li")
+                    .index(targetItem.parent("li.request"));
+                if(event.clientY - targetItem.offset().top
+                   > targetItem.height() / 2)
+                {
+                    index++;
+                }
+                
+                return {
+                    operation: operation,
+                    target: targetFolder,
+                    index: index,
+                };
+            } else {
+                return { operation: "none" };
             }
         } else {
-            event.dataTransfer.dropEffect = "none";
+            return { operation: "none" };
         }
     } else {
-        event.dataTransfer.dropEffect = "none";
+        return { operation: "none" };
     }
-    
+}
+
+
+function dragOver(event) {
+    var actualTarget = getActualTarget(event);
+    event.dataTransfer.dropEffect = actualTarget.operation;
     event.preventDefault();
 }
 
 
 function dragEnter(event) {
+    $(".drop-mark-above").removeClass("drop-mark-above");
+    $(".drop-mark-below").removeClass("drop-mark-below");
+    
+    var actualTarget = getActualTarget(event);
+    
+    if(actualTarget.operation != "none") {
+        proposedDragTarget = actualTarget.target;
+        $(proposedDragTarget).addClass("active");
+        
+        var x = $(proposedDragTarget).offset().left + 24;
+        var y;
+        var child = $(proposedDragTarget);
+        if(actualTarget.index == 0) {
+            if(child.parent("ul").has(".expanded")) {
+                child = child.next("ul");
+                if(child.has("expanded")) {
+                    child = child.children(":first-child");
+                }
+            }
+            console.log($(child).offset());
+            y = $(child).offset().top;
+        } else {
+            if(child.parent("ul").has(".expanded")) {
+                child = child.next("ul");
+                if(child.has("expanded")) {
+                    child = child.children("li")[actualTarget.index - 1];
+                }
+            }
+            console.log("b", $(child).offset());
+            y = $(child).offset().top + $(child).height();
+        }
+        var mark = $(".drop-mark");
+        y -= mark.height() / 2;
+        mark.show();
+        mark.css({
+            position: "absolute",
+            left: x,
+            top: y,
+        });
+    } else {
+        proposedDragTarget = null;
+    }
 }
 
 
 function dragLeave(event) {
+    $(".active").not(proposedDragTarget).removeClass("active");
 }
 
 
@@ -534,4 +643,4 @@ function drop(event) {
 
 $(setup);
 })();
-</script></head><body><ul id="source-list"><li class="request new-request"><div class="name">New request</span></li><li class="request"><li class="folder recent-requests expanded"><div class="name">Recent&nbsp;requests</div><ul><li class="request"><div class="name selected">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li><li class="folder expanded"><div class="name">Example&nbsp;folder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="folder collapsed"><div class="name">Example&nbsp;subfolder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li></ul></li></ul><div id="content"><div class="request"><h1><select class="method"><option>DELETE</option><option selected="">GET</option><option>POST</option><option>PUT</option></select><input class="url" type="text" required="" placeholder="ireneknapp.com/foo/bar/baz.html"></h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p><div class="buttons"><input class="do-it" type="submit" value="Do it!"></div></div><div class="response"><h1>GET ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response failed"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div></div></body></html>
+</script></head><body><ul id="source-list"><li class="request new-request"><div class="name">New request</span></li><li class="request"><li class="folder recent-requests expanded"><div class="name">Recent&nbsp;requests</div><ul><li class="request"><div class="name selected">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li><li class="folder expanded"><div class="name">Example&nbsp;folder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="folder collapsed"><div class="name">Example&nbsp;subfolder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li></ul></li></ul><div id="content"><div class="request"><h1><select class="method"><option>DELETE</option><option selected="">GET</option><option>POST</option><option>PUT</option></select><input class="url" type="text" required="" placeholder="ireneknapp.com/foo/bar/baz.html"></h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p><div class="buttons"><input class="do-it" type="submit" value="Do it!"></div></div><div class="response"><h1>GET ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response failed"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div></div><div id="superposed"><div class="drop-mark" style="display: none;"></div></div></body></html>
