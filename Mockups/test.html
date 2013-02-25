@@ -131,7 +131,16 @@ ul#source-list li > .name:-webkit-drag {
   background-color: white;
 }
 
-ul#source-list li > .name:before {
+ul#source-list li.folder.collapsed > .name:-webkit-drag::before,
+ul#source-list li.folder.expanded > .name:-webkit-drag::before {
+  background-image: none;
+}
+
+ul#source-list li > .name:-webkit-drag::before {
+  padding-left: 0;
+}
+
+ul#source-list li > .name::before {
   display: inline-block;
   margin-right: 1pt;
   padding-left: 15pt;
@@ -416,7 +425,7 @@ function sourceListDragStart(event) {
                 expandOnDragEnd = false;
             }
             
-            item.css({ opacity: 0 });
+            // item.css({ opacity: 0 });
         }
     }
 }
