@@ -1,0 +1,295 @@
+<!DOCTYPE HTML>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Direct Web Bugs</title><style>body {
+  margin: 0;
+  padding: 0;
+  background-color: #c0ffc0;
+}
+
+input, select, select > option {
+  font-size: inherit;
+  margin: 0;
+  padding: 0;
+  line-height: 1.25em;
+}
+
+input:focus, select:focus {
+  box-shadow: 0 0 2pt 1pt activeborder, inset 0 0 2pt 1pt activeborder;
+  outline: none;
+}
+
+input[type=button], input[type=submit], select {
+  border-radius: 6pt;
+  box-shadow: inset -1pt -1pt 1pt 1pt rgba(209, 209, 209, 0.25);
+  background-color: rgba(192, 192, 192, 0.5);
+}
+
+input[type=button], input[type=submit] {
+  -webkit-appearance: button;
+  border: none;
+}
+
+input[type=button]:hover, input[type=submit]:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+input[type=button]:active, input[type=submit]:active {
+  box-shadow: inset 1pt 1pt 1pt 1pt rgba(128, 128, 128, 0.25);
+  background-color: rgba(64, 64, 64, 0.5);
+}
+
+input[type=text] {
+  border: solid #a0a0a0 1px;
+  border-radius: 3pt;
+}
+
+select {
+  -webkit-appearance: button;
+  display: inline-block;
+  border: solid #a0a0a0 1px;
+  background-color: white;
+  background-image: linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+  background-image: -o-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+  background-image: -moz-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+  background-image: -webkit-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+}
+
+ul#source-list {
+  margin: 0;
+  padding: 0;
+  padding-top: 0.5em;
+  position: fixed;
+  height: 100%;
+  width: 18em;
+  top: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #e0e0ff;
+  box-shadow: inset -8pt 0 8pt -8pt #a0a0a0;
+}
+
+ul#source-list li {
+  list-style-type: none;
+  margin-left: 0.5em;
+  margin-right: 0.25em;
+  -moz-user-select: none; 
+  -khtml-user-select: none; 
+  -webkit-user-select: none; 
+  -o-user-select: none; 
+  cursor: pointer;
+}
+
+ul#source-list li > ul {
+  margin: 0;
+  margin-left: 0.75em;
+  padding: 0;
+}
+
+ul#source-list li.request {
+  list-style-type: none;
+}
+
+ul#source-list li > .name {
+  line-height: 24px;
+  vertical-align: top;
+}
+
+ul#source-list li > .name.selected {
+  background-color: Highlight;
+}
+
+ul#source-list li > .name:before {
+  display: inline-block;
+  margin-right: 1pt;
+  padding-left: 15pt;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-size: 12pt 12pt;
+  background-position: 0pt 2.5pt;
+  vertical-align: top;
+}
+
+ul#source-list li.request.new-request > .name {
+  font-weight: bold;
+}
+
+ul#source-list li.folder.recent-requests > .name {
+  font-weight: bold;
+}
+
+ul#source-list li.folder.collapsed > ul {
+  display: none;
+}
+
+ul#source-list li.folder.expanded > ul {
+  display: block;
+}
+
+ul#source-list li.folder.collapsed > .name::before {
+  background-image: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIxMnB4IiBoZWlnaHQ9IjEycHgiIHZpZXdCb3g9Ii0xLjUgLTAuOCAxMiAxMiINCgkgb3ZlcmZsb3c9InZpc2libGUiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgLTEuNSAtMC44IDEyIDEyIiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxkZWZzPg0KPC9kZWZzPg0KPHBvbHlnb24gcG9pbnRzPSIwLDAgOSw1LjIgMCwxMC40ICIvPg0KPC9zdmc+DQo=');
+}
+
+ul#source-list li.folder.expanded > .name::before {
+  background-image: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIxMnB4IiBoZWlnaHQ9IjEycHgiIHZpZXdCb3g9Ii0wLjggLTIgMTIgMTIiIG92ZXJmbG93PSJ2aXNpYmxlIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IC0wLjggLTIgMTIgMTIiDQoJIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8cG9seWdvbiBwb2ludHM9IjEwLjQsMCA1LjIsOSAwLDAgIi8+DQo8L3N2Zz4NCg==');
+}
+
+ul#source-list li.request.new-request > .name::before {
+  content: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9Ii00LjE0MyAtMC43NzQgMjQgMjQiDQoJIG92ZXJmbG93PSJ2aXNpYmxlIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IC00LjE0MyAtMC43NzQgMjQgMjQiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8cGF0aCBmaWxsPSIjODBGRjgwIiBkPSJNMTUuNzE1LDExLjIyNmMwLDEwLjMyMy0xLjI2OCwxMS4wOTQtNy4zOTUsMTEuMDk0UzAsMjEuOTM0LDAsMTEuMjI2QzAsMC41MTgsMi4xOTMsMC4xMzIsOC4zMiwwLjEzMg0KCVMxNS43MTUsMC44NjQsMTUuNzE1LDExLjIyNnoiLz4NCjxnPg0KCTxnPg0KCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMC44NTciIHkxPSI1LjIyNiIgeDI9IjguODU3IiB5Mj0iNS4yMjYiLz4NCgkJPGc+DQoJCQk8cGF0aCBkPSJNMTQuNzkxLDQuNzU1Yy0yLjg0LDEuMDU0LTYuMzYzLDIuODUyLTguNTQ3LDQuNzU2bDEuNzItNC43NTZMNi4yNDQsMEM4LjQyOCwxLjkwNCwxMS45NTEsMy43MDIsMTQuNzkxLDQuNzU1eiIvPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPHBhdGggZD0iTTcuMjEzLDE2Ljk3NGwtMC4xODgtMi44MDdjLTAuMDM1LTAuNTQ3LTAuMDUzLTAuOTM5LTAuMDUzLTEuMTc4YzAtMC4zMjQsMC4wODUtMC41NzcsMC4yNTUtMC43NTkNCgkJczAuMzk0LTAuMjcyLDAuNjcxLTAuMjcyYzAuMzM2LDAsMC41NjEsMC4xMTYsMC42NzQsMC4zNDlzMC4xNywwLjU2NywwLjE3LDEuMDA1YzAsMC4yNTgtMC4wMTQsMC41Mi0wLjA0MSwwLjc4NWwtMC4yNTIsMi44ODkNCgkJYy0wLjAyNywwLjM0NC0wLjA4NiwwLjYwNy0wLjE3NiwwLjc5MXMtMC4yMzgsMC4yNzUtMC40NDUsMC4yNzVjLTAuMjExLDAtMC4zNTctMC4wODktMC40MzktMC4yNjdTNy4yNDgsMTcuMzM3LDcuMjEzLDE2Ljk3NHoNCgkJIE03Ljg2MywyMC44M2MtMC4yMzgsMC0wLjQ0Ni0wLjA3Ny0wLjYyNC0wLjIzMXMtMC4yNjctMC4zNy0wLjI2Ny0wLjY0N2MwLTAuMjQyLDAuMDg1LTAuNDQ4LDAuMjU1LTAuNjE4czAuMzc4LTAuMjU1LDAuNjI0LTAuMjU1DQoJCXMwLjQ1NiwwLjA4NSwwLjYzLDAuMjU1czAuMjYxLDAuMzc2LDAuMjYxLDAuNjE4YzAsMC4yNzMtMC4wODgsMC40ODgtMC4yNjQsMC42NDVTOC4wOTgsMjAuODMsNy44NjMsMjAuODN6Ii8+DQo8L2c+DQo8L3N2Zz4NCg==');
+}
+
+ul#source-list li.folder.recent-requests > .name::before {
+  content: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9Ii0xLjAxNyAtMC40MTQgMjQgMjQiDQoJIG92ZXJmbG93PSJ2aXNpYmxlIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IC0xLjAxNyAtMC40MTQgMjQgMjQiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8Y2lyY2xlIGZpbGw9IiNCRkJGRkYiIGN4PSIxMC42NCIgY3k9IjEwLjY0IiByPSIxMC42NCIvPg0KPGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgeDE9IjEwLjQ4MyIgeTE9IjEwLjU4NiIgeDI9IjEwLjQ4MyIgeTI9IjEuNTg2Ii8+DQo8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTAuNDgzIiB5MT0iMTAuNTg2IiB4Mj0iMTQuNTI0IiB5Mj0iMTQuNjI3Ii8+DQo8L3N2Zz4NCg==');
+}
+
+ul#source-list li.folder > .name::before {
+  content: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9Ii0zIC0yIDI0IDI0IiBvdmVyZmxvdz0idmlzaWJsZSIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAtMyAtMiAyNCAyNCINCgkgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8ZGVmcz4NCjwvZGVmcz4NCjxwYXRoIGZpbGw9IiM5OTk5Q0MiIGQ9Ik03LjY2NywwaC03QzAuMTE0LDAsMCwwLjQ0NywwLDF2Mmg5VjFDOSwwLjQ0Nyw4LjIyLDAsNy42NjcsMHoiLz4NCjxwYXRoIGZpbGw9IiNCRkJGRkYiIGQ9Ik0yMCwxNC41YzAsMC44MjgtMC42NzIsMS41LTEuNSwxLjVoLTE3QzAuNjcyLDE2LDAsMTUuMzI4LDAsMTQuNXYtMTFDMCwyLjY3MSwwLjY3MiwyLDEuNSwyaDE3DQoJQzE5LjMyOCwyLDIwLDIuNjcxLDIwLDMuNVYxNC41eiIvPg0KPC9zdmc+DQo=');
+}
+
+ul#source-list li.request > .name::before {
+  content: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9Ii00LjE0MyAtMC43NzQgMjQgMjQiDQoJIG92ZXJmbG93PSJ2aXNpYmxlIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IC00LjE0MyAtMC43NzQgMjQgMjQiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8cGF0aCBmaWxsPSIjODBGRjgwIiBkPSJNMTUuNzE1LDExLjIyNmMwLDEwLjMyMy0xLjI2OCwxMS4wOTQtNy4zOTUsMTEuMDk0UzAsMjEuOTM0LDAsMTEuMjI2QzAsMC41MTgsMi4xOTMsMC4xMzIsOC4zMiwwLjEzMg0KCVMxNS43MTUsMC44NjQsMTUuNzE1LDExLjIyNnoiLz4NCjxnPg0KCTxnPg0KCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiM4MDgwODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTQuODU3IiB5MT0iMTEuMjI2IiB4Mj0iNi44NTciIHkyPSIxMS4yMjYiLz4NCgkJPGc+DQoJCQk8cGF0aCBmaWxsPSIjODA4MDgwIiBkPSJNMC45MjQsMTEuMjI2YzIuODQtMS4wNTQsNi4zNjMtMi44NTIsOC41NDctNC43NTZsLTEuNzIsNC43NTZsMS43Miw0Ljc1NQ0KCQkJCUM3LjI4NywxNC4wNzcsMy43NjQsMTIuMjc5LDAuOTI0LDExLjIyNnoiLz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMC44NTciIHkxPSI1LjIyNiIgeDI9IjguODU3IiB5Mj0iNS4yMjYiLz4NCgkJPGc+DQoJCQk8cGF0aCBkPSJNMTQuNzkxLDQuNzU1Yy0yLjg0LDEuMDU0LTYuMzYzLDIuODUyLTguNTQ3LDQuNzU2bDEuNzItNC43NTZMNi4yNDQsMEM4LjQyOCwxLjkwNCwxMS45NTEsMy43MDIsMTQuNzkxLDQuNzU1eiIvPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPGc+DQoJCTxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzgwODA4MCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSIxNC44NTciIHkxPSIxNy4yMjYiIHgyPSI2Ljg1NyIgeTI9IjE3LjIyNiIvPg0KCQk8Zz4NCgkJCTxwYXRoIGZpbGw9IiM4MDgwODAiIGQ9Ik0wLjkyNCwxNy42OThjMi44NC0xLjA1NCw2LjM2My0yLjg1Miw4LjU0Ny00Ljc1NmwtMS43Miw0Ljc1NmwxLjcyLDQuNzU1DQoJCQkJQzcuMjg3LDIwLjU0OCwzLjc2NCwxOC43NSwwLjkyNCwxNy42OTh6Ii8+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8L3N2Zz4NCg==');
+}
+
+div#content {
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  height: 100%;
+  width: auto;
+  left: 18em;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-shadow: inset 0 0 80pt 20pt white;
+}
+
+div#content > div {
+  position: relative;
+  margin: 1em;
+  border-radius: 1em;
+  padding: 1em;
+  padding-top: 1.5pt;
+  box-shadow: 0 0 8pt 0 #a0a0a0;
+  background-color: #90ff90;
+  background-image: linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+  background-image: -o-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+  background-image: -moz-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+  background-image: -webkit-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 3.5em,
+      rgba(192, 192, 192, 0.0) 3.5001em,
+      rgba(192, 192, 192, 0.0) 100%
+    );
+}
+
+div#content > div.failed {
+  background-color: #ffc0c0;
+}
+
+div#content > div > h1,
+div#content > div > div.buttons {
+  font-size: 175%;
+}
+
+div#content > div > h1 {
+  margin: 0;
+  margin-top: 0.25em;
+  margin-bottom: 0.75em;
+  padding: 0;
+  padding-left: -1em;
+  padding-right: -1em;
+  height: 1.25em;
+  line-height: 1.25em;
+  width: 100%;
+  font-family: sans-serif;
+  font-weight: normal;
+}
+
+div#content > div > h1 > select.method {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 6pt;
+  width: 15%;
+  border-radius: 12pt 3pt 3pt 12pt;
+  background-color: black;
+}
+
+div#content > div > h1 > input.url {
+  margin-left: 0;
+  margin-right: 0;
+  padding-right: 6pt;
+  width: 80%;
+  border-radius: 3pt 12pt 12pt 3pt;
+}
+
+div#content > div > div.buttons {
+  text-align: right;
+}
+
+div#content > div > div.toolbar {
+  display: none;
+  position: absolute;
+  top: 0.3333em;
+  right: 0.3333em;
+  font-size: 150%;
+}
+
+div#content > div:hover > div.toolbar {
+  display: inline;
+}
+
+div#content > div > div.toolbar > input[type=button] {
+  box-shadow: none;
+}
+
+span.timestamp {
+  font-size: 50%;
+  font-weight: normal;
+  font-style: italic;
+}
+
+</style></head><body><ul id="source-list"><li class="request new-request"><div class="name">New request</span></li><li class="request"><li class="folder recent-requests expanded"><div class="name">Recent&nbsp;requests</div><ul><li class="request"><div class="name selected">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li><li class="folder expanded"><div class="name">Example&nbsp;folder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="folder collapsed"><div class="name">Example&nbsp;subfolder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li></ul></li></ul><div id="content"><div class="request"><h1><select class="method"><option>DELETE</option><option selected="">GET</option><option>POST</option><option>PUT</option></select>&nbsp;<input class="url" type="text" required="" placeholder="ireneknapp.com/foo/bar/baz.html"></h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p><div class="buttons"><input class="do-it" type="submit" value="Do it!"></div></div><div class="response"><h1>GET ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response failed"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div></div></body></html>

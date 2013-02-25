@@ -1,4 +1,2 @@
-access.log
-error.log
-qmic.db
+.DS_Store
 dist
