@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.0.2, SVG Export Plug-In  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
+]>
+<svg version="1.1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+	 x="0px" y="0px" width="300px" height="24px" viewBox="-4.956 -6.077 300 24"
+	 overflow="visible" enable-background="new -4.956 -6.077 300 24" xml:space="preserve">
+<defs>
+</defs>
+<g>
+	<line fill="none" stroke="#FFFFFF" stroke-width="5" stroke-miterlimit="10" x1="6.544" y1="5.673" x2="294.544" y2="5.673"/>
+	<line fill="none" stroke="#BFBFFF" stroke-width="3" stroke-miterlimit="10" x1="6.544" y1="5.673" x2="294.544" y2="5.673"/>
+	<line fill="none" stroke="#000000" stroke-miterlimit="10" x1="6.544" y1="5.673" x2="294.544" y2="5.673"/>
+</g>
+<g>
+	<ellipse fill="none" stroke="#FFFFFF" stroke-width="5" stroke-miterlimit="10" cx="6.5" cy="5.5" rx="4" ry="3"/>
+	<ellipse fill="none" stroke="#BFBFFF" stroke-width="3" stroke-miterlimit="10" cx="6.5" cy="5.5" rx="4" ry="3"/>
+	<ellipse fill="none" stroke="#000000" stroke-miterlimit="10" cx="6.5" cy="5.5" rx="4" ry="3"/>
+</g>
+</svg>
