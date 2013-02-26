@@ -1,8 +1,17 @@
 <!DOCTYPE HTML>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Direct Web Bugs</title><style>body {
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-orient: horizontal;
+  -webkit-box-orient: horizontal;
+  -moz-box-flex: 0;
+  -webkit-box-flex: 0;
+  height: 100vh;
+  width: 100vw;
   margin: 0;
   padding: 0;
   background-color: #c0ffc0;
+  font-size: 12pt;
 }
 
 input, select, select > option {
@@ -77,28 +86,48 @@ select {
     );
 }
 
+div#sidebar {
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
+  -moz-box-flex: 0;
+  -webkit-box-flex: 0;
+  -moz-box-pack: stretch;
+  -webkit-box-pack: stretch;
+  margin: 0;
+  padding: 0;
+}
+
 ul#source-list {
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
+  -moz-box-flex: 100;
+  -webkit-box-flex: 100;
   margin: 0;
   padding: 0;
   padding-top: 0.5em;
-  position: fixed;
-  height: auto;
-  width: 18em;
-  top: 0;
-  bottom: 3em;
+  padding-bottom: 0.5em;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: #e0e0ff;
-  box-shadow: inset -8pt 0 8pt -8pt #a0a0a0;
+  box-shadow: inset -8pt 0 8pt -8pt #a0a0a0,
+              inset 0 -8pt 8pt -8pt #a0a0a0;
 }
 
 ul#source-list.focus {
   box-shadow: inset 0 0 3pt 2pt activeborder,
-              inset -8pt 0 8pt -8pt #a0a0a0;
+              inset -8pt 0 8pt -8pt #a0a0a0,
+              inset 0 -8pt 8pt -8pt #a0a0a0;
 }
 
 ul#source-list li {
-  list-style-type: none;
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
   margin-left: 0.5em;
   margin-right: 0.25em;
   -moz-user-select: none; 
@@ -107,6 +136,10 @@ ul#source-list li {
 }
 
 ul#source-list li > ul {
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
   margin: 0;
   margin-left: 0.25em;
   padding: 0;
@@ -158,6 +191,7 @@ ul#source-list li > .name::before {
   margin-right: 1pt;
   padding-left: 15pt;
   height: 24px;
+  width: 24px;
   background-repeat: no-repeat;
   background-size: 12pt 12pt;
   background-position: 0pt 2.5pt;
@@ -177,7 +211,8 @@ ul#source-list li.folder.collapsed > ul {
 }
 
 ul#source-list li.folder.expanded > ul {
-  display: block;
+  display: -moz-box;
+  display: -webkit-box;
 }
 
 ul#source-list li.folder.collapsed > .name::before {
@@ -205,32 +240,65 @@ ul#source-list li.request > .name::before {
 }
 
 div#controls {
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-flex: 0;
+  -webkit-box-flex: 0;
+  -moz-box-orient: horizontal;
+  -webkit-box-orient: horizontal;
+  -moz-box-align: stretch;
+  -webkit-box-align: stretch;
   margin: 0;
   padding: 0;
-  position: fixed;
-  height: 3em;
-  width: 18em;
-  left: 0;
-  bottom: 0;
-  border: solid red 1px;
+  background-color: #e0e0e0;
+  background-image: linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 100%
+    );
+  background-image: -o-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 100%
+    );
+  background-image: -moz-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 100%
+    );
+  background-image: -webkit-linear-gradient(
+      top,
+      rgba(230, 230, 230, 0.95) 0%,
+      rgba(192, 192, 192, 0.95) 100%
+    );
+  font-size: 175%;
+}
+
+div#controls > * {
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-flex: 1;
+  -webkit-box-flex: 1;
+  margin: 0.25em;
+  padding: 0;
 }
 
 div#content {
+  display: -moz-box;
+  display: -webkit-box;
+  -moz-box-flex: 1000;
+  -webkit-box-flex: 1000;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
   margin: 0;
   padding: 0;
-  position: fixed;
-  height: 100%;
-  width: auto;
-  left: 18em;
-  right: 0;
-  top: 0;
-  bottom: 0;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden; /* auto */
   box-shadow: inset 0 0 80pt 20pt white;
 }
 
 div#content > div {
+  display: block;
   position: relative;
   margin: 1em;
   border-radius: 1em;
@@ -282,8 +350,6 @@ div#content > div > h1 {
   margin-top: 0.25em;
   margin-bottom: 0.75em;
   padding: 0;
-  padding-left: -1em;
-  padding-right: -1em;
   height: 1.75em;
   line-height: 1.25em;
   width: 100%;
@@ -304,7 +370,7 @@ div#content > div > h1 > select.method {
   margin-left: 0;
   margin-right: 0;
   padding-left: 6pt;
-  width: 18%;
+  /*width: 18%;*/
   border-radius: 12pt 3pt 3pt 12pt;
   background-color: black;
 }
@@ -313,7 +379,7 @@ div#content > div > h1 > input.url {
   margin-left: -1pt;
   margin-right: 0;
   padding-right: 6pt;
-  width: 77%;
+  /*width: 77%;*/
   border-radius: 3pt 12pt 12pt 3pt;
 }
 
@@ -348,7 +414,7 @@ div#superposed {
 }
 
 div#superposed .drop-mark {
-  content: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9Ii00LjE0MyAtMC43NzQgMjQgMjQiDQoJIG92ZXJmbG93PSJ2aXNpYmxlIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IC00LjE0MyAtMC43NzQgMjQgMjQiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8cGF0aCBmaWxsPSIjODBGRjgwIiBkPSJNMTUuNzE1LDExLjIyNmMwLDEwLjMyMy0xLjI2OCwxMS4wOTQtNy4zOTUsMTEuMDk0UzAsMjEuOTM0LDAsMTEuMjI2QzAsMC41MTgsMi4xOTMsMC4xMzIsOC4zMiwwLjEzMg0KCVMxNS43MTUsMC44NjQsMTUuNzE1LDExLjIyNnoiLz4NCjxnPg0KCTxnPg0KCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiM4MDgwODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTQuODU3IiB5MT0iMTEuMjI2IiB4Mj0iNi44NTciIHkyPSIxMS4yMjYiLz4NCgkJPGc+DQoJCQk8cGF0aCBmaWxsPSIjODA4MDgwIiBkPSJNMC45MjQsMTEuMjI2YzIuODQtMS4wNTQsNi4zNjMtMi44NTIsOC41NDctNC43NTZsLTEuNzIsNC43NTZsMS43Miw0Ljc1NQ0KCQkJCUM3LjI4NywxNC4wNzcsMy43NjQsMTIuMjc5LDAuOTI0LDExLjIyNnoiLz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMC44NTciIHkxPSI1LjIyNiIgeDI9IjguODU3IiB5Mj0iNS4yMjYiLz4NCgkJPGc+DQoJCQk8cGF0aCBkPSJNMTQuNzkxLDQuNzU1Yy0yLjg0LDEuMDU0LTYuMzYzLDIuODUyLTguNTQ3LDQuNzU2bDEuNzItNC43NTZMNi4yNDQsMEM4LjQyOCwxLjkwNCwxMS45NTEsMy43MDIsMTQuNzkxLDQuNzU1eiIvPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPGc+DQoJCTxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzgwODA4MCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSIxNC44NTciIHkxPSIxNy4yMjYiIHgyPSI2Ljg1NyIgeTI9IjE3LjIyNiIvPg0KCQk8Zz4NCgkJCTxwYXRoIGZpbGw9IiM4MDgwODAiIGQ9Ik0wLjkyNCwxNy42OThjMi44NC0xLjA1NCw2LjM2My0yLjg1Miw4LjU0Ny00Ljc1NmwtMS43Miw0Ljc1NmwxLjcyLDQuNzU1DQoJCQkJQzcuMjg3LDIwLjU0OCwzLjc2NCwxOC43NSwwLjkyNCwxNy42OTh6Ii8+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8L3N2Zz4NCg==');
+  background-image: url('data:image/svg+xml;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNS4wLjIsIFNWRyBFeHBvcnQgUGx1Zy1JbiAgLS0+DQo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiIFsNCgk8IUVOVElUWSBuc19mbG93cyAiaHR0cDovL25zLmFkb2JlLmNvbS9GbG93cy8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSINCgkgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YT0iaHR0cDovL25zLmFkb2JlLmNvbS9BZG9iZVNWR1ZpZXdlckV4dGVuc2lvbnMvMy4wLyINCgkgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIzMDBweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSItNC45NTYgLTYuMDc3IDMwMCAyNCINCgkgb3ZlcmZsb3c9InZpc2libGUiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgLTQuOTU2IC02LjA3NyAzMDAgMjQiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8Zz4NCgk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iNi41NDQiIHkxPSI1LjY3MyIgeDI9IjI5NC41NDQiIHkyPSI1LjY3MyIvPg0KCTxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0JGQkZGRiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSI2LjU0NCIgeTE9IjUuNjczIiB4Mj0iMjk0LjU0NCIgeTI9IjUuNjczIi8+DQoJPGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSI2LjU0NCIgeTE9IjUuNjczIiB4Mj0iMjk0LjU0NCIgeTI9IjUuNjczIi8+DQo8L2c+DQo8Zz4NCgk8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNi41IiBjeT0iNS41IiByeD0iNCIgcnk9IjMiLz4NCgk8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9IiNCRkJGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNi41IiBjeT0iNS41IiByeD0iNCIgcnk9IjMiLz4NCgk8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjYuNSIgY3k9IjUuNSIgcng9IjQiIHJ5PSIzIi8+DQo8L2c+DQo8L3N2Zz4NCg==');
 }
 
 span.timestamp {
@@ -370,6 +436,7 @@ var collapseOnDragEnd;
 var expandOnDragEnd;
 
 function setup() {
+    $("input, select").focus(focusControl);
     $("ul#source-list").click(focusSourceList);
     $("div#content").click(defocusSourceList);
     $("ul#source-list li > .name").on("mousedown", select);
@@ -381,6 +448,11 @@ function setup() {
     document.body.addEventListener("dragleave", dragLeave);
     document.body.addEventListener("drag", drag);
     document.body.addEventListener("drop", drop);
+}
+
+
+function focusControl(event) {
+    $(".focus").removeClass("focus");
 }
 
 
@@ -595,9 +667,6 @@ function dragOver(event) {
 
 
 function dragEnter(event) {
-    $(".drop-mark-above").removeClass("drop-mark-above");
-    $(".drop-mark-below").removeClass("drop-mark-below");
-    
     var actualTarget = getActualTarget(event);
     
     if(actualTarget.operation != "none") {
@@ -614,7 +683,6 @@ function dragEnter(event) {
                     child = child.children(":first-child");
                 }
             }
-            console.log($(child).offset());
             y = $(child).offset().top;
         } else {
             if(child.parent("ul").has(".expanded")) {
@@ -623,16 +691,18 @@ function dragEnter(event) {
                     child = child.children("li")[actualTarget.index - 1];
                 }
             }
-            console.log("b", $(child).offset());
             y = $(child).offset().top + $(child).height();
         }
         var mark = $(".drop-mark");
-        y -= mark.height() / 2;
+        y -= 12;
+        var w = $(proposedDragTarget).width() - 24;
         mark.show();
         mark.css({
             position: "absolute",
             left: x,
             top: y,
+            width: w,
+            height: 24,
         });
     } else {
         proposedDragTarget = null;
@@ -654,4 +724,4 @@ function drop(event) {
 
 $(setup);
 })();
-</script></head><body><ul id="source-list"><li class="request new-request"><div class="name">New request</span></li><li class="request"><li class="folder recent-requests expanded"><div class="name">Recent&nbsp;requests</div><ul><li class="request"><div class="name selected">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li><li class="folder expanded"><div class="name">Example&nbsp;folder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="folder collapsed"><div class="name">Example&nbsp;subfolder</div><ul><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request"><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li></ul></li></ul><div id="controls"><input id="move-source-item" type="button" value="Move"><input id="delete-source-item" type="button" value="Delete"></div><div id="content"><div class="request"><h1><select class="method"><option>DELETE</option><option selected="">GET</option><option>POST</option><option>PUT</option></select><input class="url" type="text" required="" placeholder="ireneknapp.com/foo/bar/baz.html"></h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p><div class="buttons"><input class="do-it" type="submit" value="Do it!"></div></div><div class="response"><h1>GET ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response failed"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div></div><div id="superposed"><div class="drop-mark" style="display: none;"></div></div></body></html>
+</script></head><body><div id="sidebar"><ul id="source-list"><li class="request new-request" draggable=""><div class="name">New request</span></li><li class="request" draggable=""><li class="folder recent-requests expanded"><div class="name">Recent&nbsp;requests</div><ul><li class="request" draggable=""><div class="name selected">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li><li class="folder expanded"><div class="name">Example&nbsp;folder</div><ul><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="folder collapsed"><div class="name">Example&nbsp;subfolder</div><ul><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li></ul></li></ul><div id="controls"><input id="move-source-item" type="button" value="Move"><input id="delete-source-item" type="button" value="Delete"></div></div><div id="content"><div class="request"><h1><select class="method"><option>DELETE</option><option selected="">GET</option><option>POST</option><option>PUT</option></select><input class="url" type="text" required="" placeholder="ireneknapp.com/foo/bar/baz.html"></h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p><div class="buttons"><input class="do-it" type="submit" value="Do it!"></div></div><div class="response"><h1>GET ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response failed"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div></div><div id="superposed"><div class="drop-mark" style="display: none;"></div></div></body></html>
