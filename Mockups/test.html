@@ -150,6 +150,10 @@ ul#source-list li.request {
 }
 
 ul#source-list li > .name {
+  display: -moz-box;
+  display: -webkit-flex;
+  -moz-box-orient: horizontal;
+  -webkit-flex-direction: row;
   line-height: 24px;
   vertical-align: top;
   -webkit-user-drag: element;
@@ -364,7 +368,7 @@ div#content > div > h1 {
     );
 }
 
-div#content > div.nojump >div > div.buttons {
+div#content > div > div.buttons {
   user-select: none;
   -webkit-user-select: none;
 }
@@ -377,6 +381,7 @@ div#content > div > h1 > select.method {
   margin-left: 0;
   margin-right: 0;
   padding-left: 6pt;
+  padding-right: 3pt;
   border-radius: 12pt 3pt 3pt 12pt;
   background-color: black;
 }
@@ -388,12 +393,17 @@ div#content > div > h1 > input.url {
   -webkit-flex: 1000 1000 auto;
   margin-left: -1pt;
   margin-right: 0;
+  padding-left: 3pt;
   padding-right: 6pt;
   border-radius: 3pt 12pt 12pt 3pt;
 }
 
 div#content > div > div.buttons {
   text-align: right;
+}
+
+div#content > div > div.buttons > * {
+  margin: 0.25em;
 }
 
 div#content > div > div.toolbar {
@@ -504,14 +514,26 @@ function toggleExpansion(event) {
 
 
 function collapse(folder) {
+    var sourceList = $("ul#source-list");
     folder.height("auto");
     
+    var startWidth = sourceList.width();
     var startHeight = folder.height();
     var startClass = folder.attr("class");
     folder.removeClass("expanded");
     folder.addClass("collapsed");
+    var endWidth = sourceList.width();
     var endHeight = folder.height();
     var endClass = folder.attr("class");
+    
+    sourceList.width(startWidth);
+    sourceList.animate({ width: endWidth }, {
+        queue: false,
+        duration: 200,
+        complete: function() {
+            sourceList.removeAttr("style");
+        },
+    });
     
     folder.attr("class", startClass);
     folder.addClass("recently-toggled");
@@ -528,14 +550,26 @@ function collapse(folder) {
 
 
 function expand(folder) {
+    var sourceList = $("ul#source-list");
     folder.height("auto");
     
+    var startWidth = sourceList.width();
     var startHeight = folder.height();
     var startClass = folder.attr("class");
     folder.removeClass("collapsed");
     folder.addClass("expanded");
+    var endWidth = sourceList.width();
     var endHeight = folder.height();
     var endClass = folder.attr("class");
+    
+    sourceList.width(startWidth);
+    sourceList.animate({ width: endWidth }, {
+        queue: false,
+        duration: 200,
+        complete: function() {
+            sourceList.removeAttr("style");
+        },
+    });
     
     folder.addClass("recently-toggled");
     folder.height(startHeight);
@@ -544,6 +578,7 @@ function expand(folder) {
         duration: 200,
         complete: function() {
             folder.removeClass("recently-toggled");
+            folder.removeAttr("style");
         },
     });
 }
@@ -733,4 +768,4 @@ function drop(event) {
 
 $(setup);
 })();
-</script></head><body><div id="sidebar"><ul id="source-list"><li class="request new-request" draggable=""><div class="name">New request</span></li><li class="request" draggable=""><li class="folder recent-requests expanded"><div class="name">Recent&nbsp;requests</div><ul><li class="request" draggable=""><div class="name selected">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li><li class="folder expanded"><div class="name">Example&nbsp;folder</div><ul><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="folder collapsed"><div class="name">Example&nbsp;subfolder</div><ul><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</span></li></ul></li></ul></li></ul><div id="controls"><input id="move-source-item" type="button" value="Move"><input id="delete-source-item" type="button" value="Delete"></div></div><div id="content"><div class="request"><h1><select class="method"><option>DELETE</option><option selected="">GET</option><option>POST</option><option>PUT</option></select><input class="url" type="text" required="" placeholder="ireneknapp.com/foo/bar/baz.html"></h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p><div class="buttons"><input class="do-it" type="submit" value="Do it!"></div></div><div class="response"><h1>GET ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response failed"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div></div><div id="superposed"><div class="drop-mark" style="display: none;"></div></div></body></html>
+</script></head><body><div id="sidebar"><ul id="source-list"><li class="request new-request" draggable=""><div class="name">New request</div></li><li class="request" draggable=""><li class="folder recent-requests expanded"><div class="name">Recent&nbsp;requests</div><ul><li class="request" draggable=""><div class="name selected">GET&nbsp;ireneknapp.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li></ul></li><li class="folder expanded"><div class="name">Example&nbsp;folder</div><ul><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li><li class="folder collapsed"><div class="name">Example&nbsp;subfolder</div><ul><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;ireneknapp.com</div></li></ul></li><li class="folder collapsed"><div class="name">Really wide names</div><ul><li class="request" draggable=""><div class="name">GET&nbsp;antidisestablishmentarianism.com</div></li><li class="request" draggable=""><div class="name">GET&nbsp;supercalifragilisticexpialidocious.org</div></li><li class="request" draggable=""><div class="name">GET&nbsp;internet-engineering-task-force.net</div></li><li class="request" draggable=""></li></ul></li></ul></li></ul><div id="controls"><input id="move-source-item" type="button" value="Move"><input id="delete-source-item" type="button" value="Delete"></div></div><div id="content"><div class="request"><h1><select class="method"><option>DELETE</option><option selected="">GET</option><option>POST</option><option>PUT</option></select><input class="url" type="text" required="" placeholder="ireneknapp.com/foo/bar/baz.html"></h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p><div class="buttons"><input class="do-it" type="submit" value="Do it!"></div></div><div class="response"><h1>GET ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response failed"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div><div class="response"><h1>POST ireneknapp.com <span class="timestamp">2013-02-24 8:04:15 PM</span></h1><div class="toolbar"><input type="button" value="Save"> <input type="button" value="Close"></div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id turpis id nisl aliquet dignissim in ut lectus. Nullam tortor erat, convallis sit amet hendrerit a, tincidunt sed erat. Maecenas iaculis cursus diam. Quisque ac nunc lorem. Maecenas dictum volutpat odio nec facilisis. Integer sagittis tincidunt leo ac dictum. Vestibulum pulvinar fringilla tellus, non pretium odio auctor sit amet.</p></div></div><div id="superposed"><div class="drop-mark" style="display: none;"></div></div></body></html>
